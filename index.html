@@ -1,0 +1,2410 @@
+<!DOCTYPE html>
+<html lang="en" class="light">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"/>
+    <title>MindGym Pro - Upgraded Brain Exercises</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            light: '#f8fafc',
+                            dark: '#0f172a',
+                            primary: '#6366f1',
+                            secondary: '#3b82f6',
+                            accent: '#10b981',
+                            amber: '#f59e0b'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* Modern Premium Aptos & Sans-Serif Font Stack */
+        body {
+            font-family: 'Aptos', 'Outfit', system-ui, -apple-system, sans-serif;
+            -webkit-tap-highlight-color: transparent;
+            user-select: none;
+            overscroll-behavior: contain;
+        }
+
+        /* Fluid, elderly-friendly scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 99px;
+        }
+        .dark ::-webkit-scrollbar-thumb {
+            background: #334155;
+        }
+
+        /* Smooth card animations */
+        .game-card-transition {
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        /* 3D Card Flip for Picture Match */
+        .pm-card {
+            perspective: 1000px;
+            aspect-ratio: 1 / 1;
+        }
+        .pm-card-inner {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            transform-style: preserve-3d;
+        }
+        .pm-card.flipped .pm-card-inner {
+            transform: rotateY(180deg);
+        }
+        .pm-card-front, .pm-card-back {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            border-radius: 1rem;
+        }
+        .pm-card-back {
+            transform: rotateY(180deg);
+        }
+
+        /* Digit Dash Circular Countdown Progress styles */
+        .circle-timer-svg {
+            transform: rotate(-90deg);
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-900 dark:bg-[#090d16] dark:text-slate-100 min-h-screen flex flex-col justify-start items-stretch p-0 m-0">
+
+    <!-- GLOBAL HEADER (Flushed to Top, Compact, & Clean) -->
+    <header class="w-full bg-white dark:bg-[#111827] border-b border-slate-200 dark:border-slate-800 py-3 px-4 sm:px-6 flex items-center justify-between sticky top-0 z-50">
+        <div class="flex items-center gap-3">
+            <div class="w-10 h-10 bg-gradient-to-tr from-indigo-500 to-emerald-500 rounded-xl flex items-center justify-center text-white shadow-md shadow-indigo-500/20">
+                <i data-lucide="brain" class="w-6 h-6"></i>
+            </div>
+            <div>
+                <h1 class="text-xl font-extrabold tracking-tight bg-gradient-to-r from-indigo-500 to-indigo-600 dark:from-indigo-400 dark:to-emerald-400 bg-clip-text text-transparent">MindGym Pro</h1>
+                <span id="player-badge" class="text-[11px] font-medium text-slate-400 dark:text-slate-500 uppercase">Interactive Cognitive Hub</span>
+            </div>
+        </div>
+        
+        <div class="flex items-center gap-2">
+            <!-- Theme Toggle -->
+            <button onclick="toggleTheme()" class="p-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 transition-all" aria-label="Toggle Theme">
+                <i id="theme-icon" data-lucide="sun" class="w-5 h-5"></i>
+            </button>
+            
+            <!-- Phone/Account Settings Button (Hidden initially) -->
+            <button id="profile-btn" onclick="openProfileModal()" class="hidden p-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 transition-all">
+                <i data-lucide="user" class="w-5 h-5"></i>
+            </button>
+        </div>
+    </header>
+
+    <!-- MAIN APP WRAPPER -->
+    <main class="flex-grow w-full max-w-4xl mx-auto px-4 py-4 flex flex-col justify-start items-stretch">
+
+        <!-- ============================================== -->
+        <!-- SCREEN 1: LOGIN / PHONE REGISTRATION -->
+        <!-- ============================================== -->
+        <section id="screen-login" class="flex-grow flex flex-col justify-center items-center py-6">
+            <div class="w-full max-w-md bg-white dark:bg-[#111827] rounded-3xl p-6 sm:p-8 shadow-xl border border-slate-100 dark:border-slate-800/80 text-center space-y-6">
+                <div class="inline-flex p-4 rounded-full bg-indigo-50 dark:bg-indigo-950/40 text-indigo-500 mb-2">
+                    <i data-lucide="smartphone" class="w-10 h-10"></i>
+                </div>
+                <div>
+                    <h2 class="text-2xl font-bold text-slate-800 dark:text-white">Track Your Progress!</h2>
+                    <p class="text-slate-500 dark:text-slate-400 mt-2 text-sm sm:text-base leading-relaxed">
+                        Enter your mobile number to load your mental scoreboard, track streaks, and unlock healthy mind awards.
+                    </p>
+                </div>
+
+                <div class="text-left space-y-2">
+                    <label for="mobile-number" class="text-xs font-bold uppercase tracking-wide text-slate-400 dark:text-slate-500">Mobile Number</label>
+                    <div class="relative">
+                        <span class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 font-medium text-lg">+</span>
+                        <input id="mobile-number" type="tel" pattern="[0-9]*" placeholder="Enter Mobile Number" 
+                               class="w-full pl-8 pr-4 py-4 rounded-2xl bg-slate-50 dark:bg-[#1e293b] border-2 border-slate-200 dark:border-slate-700 focus:border-indigo-500 dark:focus:border-indigo-400 text-lg font-semibold tracking-wider text-slate-800 dark:text-white transition-colors outline-none"/>
+                    </div>
+                </div>
+
+                <button onclick="loginUser()" class="w-full bg-gradient-to-r from-indigo-500 to-indigo-600 hover:from-indigo-600 hover:to-indigo-700 text-white font-bold py-4 rounded-2xl shadow-lg shadow-indigo-500/20 flex items-center justify-center gap-2 text-lg active:scale-98 transition-all">
+                    <span>Get Started</span>
+                    <i data-lucide="arrow-right" class="w-5 h-5"></i>
+                </button>
+                <button onclick="bypassLogin()" class="text-sm font-medium text-indigo-500 dark:text-indigo-400 hover:underline">
+                    Continue as Guest
+                </button>
+            </div>
+        </section>
+
+        <!-- ============================================== -->
+        <!-- SCREEN 2: THE MAIN DASHBOARD -->
+        <!-- ============================================== -->
+        <section id="screen-dashboard" class="hidden flex-col gap-6">
+            
+            <!-- Welcome Calendar Panel with Dynamic Dates & Greeting -->
+            <div class="bg-gradient-to-r from-indigo-600 via-purple-600 to-blue-600 text-white rounded-3xl p-6 shadow-xl relative overflow-hidden flex flex-col justify-between min-h-[160px] gap-4">
+                <div class="absolute -right-10 -bottom-10 w-44 h-44 bg-white/10 rounded-full blur-2xl"></div>
+                <div>
+                    <span class="bg-white/20 text-white text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider">Daily Training</span>
+                    <h2 class="text-xl sm:text-2xl font-black mt-3 leading-tight text-white">
+                        Welcome to another day of brain training, <span id="dash-user-label" class="text-emerald-300">Player</span>!
+                    </h2>
+                </div>
+                
+                <!-- Dynamic Gregorian & Chinese Lunar Calendar + Time Display -->
+                <div class="bg-black/20 rounded-2xl p-4 flex flex-col md:flex-row justify-between items-start md:items-center gap-2">
+                    <div class="flex flex-col text-left">
+                        <span id="calendar-gregorian" class="text-sm font-extrabold tracking-wide">Sunday, 7 June 2026</span>
+                        <span id="calendar-lunar" class="text-xs text-indigo-200 font-bold mt-0.5">丙午马年四月廿二 (Lunar Calendar)</span>
+                    </div>
+                    <div class="text-right flex items-center gap-2 shrink-0 self-stretch md:self-auto border-t border-white/10 md:border-t-0 pt-2 md:pt-0">
+                        <i data-lucide="clock" class="w-4 h-4 text-emerald-300"></i>
+                        <span id="dashboard-clock" class="text-base font-black tracking-widest text-emerald-300">15:33:00</span>
+                    </div>
+                </div>
+
+                <div class="flex items-center gap-6 pt-2 border-t border-white/10 text-sm">
+                    <div class="flex items-center gap-2">
+                        <i data-lucide="zap" class="text-amber-300 w-5 h-5 fill-amber-300"></i>
+                        <span>Streak: <strong id="dash-streak">1</strong> Day(s)</span>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <i data-lucide="trophy" class="text-yellow-300 w-5 h-5 fill-yellow-300"></i>
+                        <span>Score: <strong id="dash-score">0</strong> pts</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- COACHES RECOMMENDATION & GEMINI AI TIPS -->
+            <div class="bg-white dark:bg-[#111827] rounded-3xl p-5 border border-slate-100 dark:border-slate-800/80 shadow-md">
+                <div class="flex items-start gap-4">
+                    <div class="w-12 h-12 rounded-2xl bg-indigo-50 dark:bg-indigo-950/50 flex items-center justify-center text-indigo-500 shrink-0">
+                        <i data-lucide="sparkles" class="w-6 h-6"></i>
+                    </div>
+                    <div class="space-y-1 flex-grow">
+                        <div class="flex items-center justify-between">
+                            <h3 class="text-base font-extrabold text-indigo-500 uppercase tracking-wider">AI Cognitive Tip</h3>
+                            <button onclick="refreshAITip()" class="text-xs flex items-center gap-1 text-slate-400 hover:text-indigo-500">
+                                <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i> Refresh
+                            </button>
+                        </div>
+                        <p id="ai-coaching-box" class="text-slate-600 dark:text-slate-300 text-sm sm:text-base italic font-medium leading-relaxed">
+                            "Connecting to your personalized AI coach to generate cognitive strategies..."
+                        </p>
+                        <div id="ai-loading" class="w-5 h-5 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin mt-1"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- COMPACT 3X3 GRID FOR MOBILE & ELDERLY USABILITY (No Headers) -->
+            <div class="grid grid-cols-3 gap-3">
+                
+                <!-- 1. Learn Malay Joy (Icon: languages, Amber Theme) -->
+                <div onclick="launchGame('learn_malay')" class="game-card-transition bg-gradient-to-b from-amber-500/10 to-amber-500/5 dark:from-amber-950/30 dark:to-amber-950/15 border-2 border-amber-500/20 hover:border-amber-500 rounded-2xl p-3 flex flex-col items-center justify-center text-center cursor-pointer shadow-sm">
+                    <div class="w-11 h-11 sm:w-12 sm:h-12 rounded-xl bg-amber-500 text-white flex items-center justify-center shadow-md shadow-amber-500/20 mb-2">
+                        <i data-lucide="languages" class="w-7 h-7"></i>
+                    </div>
+                    <span class="text-xs sm:text-sm font-black leading-tight text-slate-800 dark:text-slate-200">Learn Malay</span>
+                </div>
+
+                <!-- 2. Picture Match (Icon: shapes, Emerald Theme) -->
+                <div onclick="launchGame('picture_match')" class="game-card-transition bg-gradient-to-b from-emerald-500/10 to-emerald-500/5 dark:from-emerald-950/30 dark:to-emerald-950/15 border-2 border-emerald-500/20 hover:border-emerald-500 rounded-2xl p-3 flex flex-col items-center justify-center text-center cursor-pointer shadow-sm">
+                    <div class="w-11 h-11 sm:w-12 sm:h-12 rounded-xl bg-emerald-500 text-white flex items-center justify-center shadow-md shadow-emerald-500/20 mb-2">
+                        <i data-lucide="shapes" class="w-7 h-7"></i>
+                    </div>
+                    <span class="text-xs sm:text-sm font-black leading-tight text-slate-800 dark:text-slate-200">Picture Match</span>
+                </div>
+
+                <!-- 3. Word Search (Icon: search, Teal Theme) -->
+                <div onclick="launchGame('word_search')" class="game-card-transition bg-gradient-to-b from-teal-500/10 to-teal-500/5 dark:from-teal-950/30 dark:to-teal-950/15 border-2 border-teal-500/20 hover:border-teal-500 rounded-2xl p-3 flex flex-col items-center justify-center text-center cursor-pointer shadow-sm">
+                    <div class="w-11 h-11 sm:w-12 sm:h-12 rounded-xl bg-teal-500 text-white flex items-center justify-center shadow-md shadow-teal-500/20 mb-2">
+                        <i data-lucide="search" class="w-7 h-7"></i>
+                    </div>
+                    <span class="text-xs sm:text-sm font-black leading-tight text-slate-800 dark:text-slate-200">Word Search</span>
+                </div>
+
+                <!-- 4. Word Recall (Icon: list-checks, Blue Theme) -->
+                <div onclick="launchGame('word_recall')" class="game-card-transition bg-gradient-to-b from-blue-500/10 to-blue-500/5 dark:from-blue-950/30 dark:to-blue-950/15 border-2 border-blue-500/20 hover:border-blue-500 rounded-2xl p-3 flex flex-col items-center justify-center text-center cursor-pointer shadow-sm">
+                    <div class="w-11 h-11 sm:w-12 sm:h-12 rounded-xl bg-blue-500 text-white flex items-center justify-center shadow-md shadow-blue-500/20 mb-2">
+                        <i data-lucide="list-checks" class="w-7 h-7"></i>
+                    </div>
+                    <span class="text-xs sm:text-sm font-black leading-tight text-slate-800 dark:text-slate-200">Word Recall</span>
+                </div>
+
+                <!-- 5. Digit Dash (Icon: calculator, Purple Theme) -->
+                <div onclick="launchGame('digit_dash')" class="game-card-transition bg-gradient-to-b from-purple-500/10 to-purple-500/5 dark:from-purple-950/30 dark:to-purple-950/15 border-2 border-purple-500/20 hover:border-purple-500 rounded-2xl p-3 flex flex-col items-center justify-center text-center cursor-pointer shadow-sm">
+                    <div class="w-11 h-11 sm:w-12 sm:h-12 rounded-xl bg-purple-500 text-white flex items-center justify-center shadow-md shadow-purple-500/20 mb-2">
+                        <i data-lucide="calculator" class="w-7 h-7"></i>
+                    </div>
+                    <span class="text-xs sm:text-sm font-black leading-tight text-slate-800 dark:text-slate-200">Digit Dash</span>
+                </div>
+
+                <!-- 6. Sudoku (Icon: grid-3x3, Pink Theme) -->
+                <div onclick="launchGame('sudoku')" class="game-card-transition bg-gradient-to-b from-pink-500/10 to-pink-500/5 dark:from-pink-950/30 dark:to-pink-950/15 border-2 border-pink-500/20 hover:border-pink-500 rounded-2xl p-3 flex flex-col items-center justify-center text-center cursor-pointer shadow-sm">
+                    <div class="w-11 h-11 sm:w-12 sm:h-12 rounded-xl bg-pink-500 text-white flex items-center justify-center shadow-md shadow-pink-500/20 mb-2">
+                        <i data-lucide="grid-3x3" class="w-7 h-7"></i>
+                    </div>
+                    <span class="text-xs sm:text-sm font-black leading-tight text-slate-800 dark:text-slate-200">Sudoku Joy</span>
+                </div>
+
+                <!-- 7. CNA News (Icon: globe, Red Theme) -->
+                <a href="https://www.channelnewsasia.com/" target="_blank" class="game-card-transition bg-gradient-to-b from-red-500/10 to-red-500/5 dark:from-red-950/30 dark:to-red-950/15 border-2 border-red-500/20 hover:border-red-500 rounded-2xl p-3 flex flex-col items-center justify-center text-center shadow-sm">
+                    <div class="w-11 h-11 sm:w-12 sm:h-12 rounded-xl bg-red-500 text-white flex items-center justify-center shadow-md shadow-red-500/20 mb-2">
+                        <i data-lucide="globe" class="w-7 h-7"></i>
+                    </div>
+                    <span class="text-xs sm:text-sm font-black leading-tight text-slate-800 dark:text-slate-200">CNA News</span>
+                </a>
+
+                <!-- 8. Straits Times (Icon: newspaper, Cyan Theme) -->
+                <a href="https://www.straitstimes.com/" target="_blank" class="game-card-transition bg-gradient-to-b from-cyan-500/10 to-cyan-500/5 dark:from-cyan-950/30 dark:to-cyan-950/15 border-2 border-cyan-500/20 hover:border-cyan-500 rounded-2xl p-3 flex flex-col items-center justify-center text-center shadow-sm">
+                    <div class="w-11 h-11 sm:w-12 sm:h-12 rounded-xl bg-cyan-500 text-white flex items-center justify-center shadow-md shadow-cyan-500/20 mb-2">
+                        <i data-lucide="newspaper" class="w-7 h-7"></i>
+                    </div>
+                    <span class="text-xs sm:text-sm font-black leading-tight text-slate-800 dark:text-slate-200">Straits Times</span>
+                </a>
+
+                <!-- 9. CNA Games (Icon: gamepad-2, Orange Theme) -->
+                <a href="https://www.channelnewsasia.com/games" target="_blank" class="game-card-transition bg-gradient-to-b from-orange-500/10 to-orange-500/5 dark:from-orange-950/30 dark:to-orange-950/15 border-2 border-orange-500/20 hover:border-orange-500 rounded-2xl p-3 flex flex-col items-center justify-center text-center shadow-sm">
+                    <div class="w-11 h-11 sm:w-12 sm:h-12 rounded-xl bg-orange-500 text-white flex items-center justify-center shadow-md shadow-orange-500/20 mb-2">
+                        <i data-lucide="gamepad-2" class="w-7 h-7"></i>
+                    </div>
+                    <span class="text-xs sm:text-sm font-black leading-tight text-slate-800 dark:text-slate-200">CNA Games</span>
+                </a>
+
+            </div>
+
+            <!-- LOGGED PLAYER PERFORMANCE TRACKER -->
+            <div class="bg-white dark:bg-[#111827] rounded-3xl p-6 border border-slate-100 dark:border-slate-800/80 shadow-md">
+                <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-4">
+                    <h3 class="text-base font-extrabold text-slate-700 dark:text-slate-300 uppercase tracking-wider">Your Exercise Records</h3>
+                    <div class="flex items-center gap-3">
+                        <button onclick="shareDashboardHistory()" class="px-3 py-1.5 bg-[#25D366] hover:bg-[#20ba5a] text-white text-xs font-bold rounded-lg flex items-center gap-1">
+                            <i data-lucide="share-2" class="w-3.5 h-3.5"></i> Share Records
+                        </button>
+                        <button onclick="clearHistory()" class="text-xs text-red-500 hover:underline">Clear Logs</button>
+                    </div>
+                </div>
+                <div id="stats-log-list" class="space-y-3">
+                    <div class="text-center text-slate-400 py-6 text-sm">No exercises logged yet today. Complete a game to track!</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ============================================== -->
+        <!-- GAME VIEW CONTROLLER PANELS -->
+        <!-- ============================================== -->
+
+        <!-- --- NEW GAME: LEARN MALAY --- -->
+        <section id="game-learn_malay" class="hidden flex-col gap-4">
+            <div class="flex items-center justify-between py-2">
+                <button onclick="exitToDashboard()" class="flex items-center gap-2 px-4 py-2 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 rounded-xl font-bold transition-all text-sm">
+                    <i data-lucide="arrow-left" class="w-4 h-4"></i> Exit to Hub
+                </button>
+                <div class="flex items-center gap-3">
+                    <span id="lm-round-tracker" class="px-3 py-1 bg-amber-500 text-white text-xs font-bold rounded-lg uppercase">Round 1 of 3</span>
+                    <span id="lm-score-display" class="font-bold text-amber-500">Score: 0</span>
+                </div>
+            </div>
+
+            <div class="bg-white dark:bg-[#111827] rounded-3xl p-6 border border-slate-100 dark:border-slate-800/80 shadow-lg flex flex-col gap-5 text-center">
+                <div>
+                    <h2 class="text-2xl font-black text-slate-800 dark:text-white">Mari Belajar Melayu!</h2>
+                    <p class="text-slate-500 dark:text-slate-400 text-sm mt-1">Translate the Singapore Primary School Malay syllabus phrase shown below into English!</p>
+                </div>
+
+                <!-- Difficulty selection -->
+                <div class="flex justify-center gap-2">
+                    <button onclick="setMalayLevel('easy')" id="lm-btn-easy" class="px-4 py-2 rounded-xl text-xs font-bold uppercase bg-amber-500 text-white transition-all">Easy</button>
+                    <button onclick="setMalayLevel('medium')" id="lm-btn-medium" class="px-4 py-2 rounded-xl text-xs font-bold uppercase bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 transition-all">Medium</button>
+                    <button onclick="setMalayLevel('hard')" id="lm-btn-hard" class="px-4 py-2 rounded-xl text-xs font-bold uppercase bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 transition-all">Hard</button>
+                </div>
+
+                <!-- Word Card Prompt -->
+                <div class="bg-amber-500 text-white rounded-3xl p-6 shadow-md border-2 border-amber-400/20 max-w-sm mx-auto w-full">
+                    <div class="text-xs uppercase font-bold text-amber-100">Malay Word / Phrase</div>
+                    <div id="lm-phrase-display" class="text-3xl font-black tracking-wide mt-2">Selamat Pagi</div>
+                </div>
+
+                <!-- Helper Actions: Hint and Give Up -->
+                <div class="grid grid-cols-2 gap-3 max-w-sm mx-auto w-full">
+                    <button onclick="malayTriggerHint()" class="flex items-center justify-center gap-2 py-2.5 bg-amber-50 hover:bg-amber-100 dark:bg-amber-950/20 text-amber-600 dark:text-amber-400 rounded-xl text-sm font-bold transition-all">
+                        <i data-lucide="lightbulb" class="w-4 h-4"></i> Hide 1 Wrong
+                    </button>
+                    <button onclick="malayTriggerGiveUp()" class="flex items-center justify-center gap-2 py-2.5 bg-red-50 hover:bg-red-100 dark:bg-red-950/20 text-red-600 dark:text-red-400 rounded-xl text-sm font-bold transition-all">
+                        <i data-lucide="eye" class="w-4 h-4"></i> Show Answer
+                    </button>
+                </div>
+
+                <!-- Multiple Choice Target Grids (48px targets) -->
+                <div class="space-y-3 max-w-sm mx-auto w-full">
+                    <div class="text-xs font-bold text-slate-400 uppercase tracking-wide">Choose the Correct English Translation:</div>
+                    <div id="lm-options-container" class="grid grid-cols-1 gap-2.5">
+                        <!-- Choices buttons injected dynamically -->
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <!-- --- GAME: PICTURE MATCH --- -->
+        <section id="game-picture_match" class="hidden flex-col gap-4">
+            <!-- Nav-Back Menu -->
+            <div class="flex items-center justify-between py-2">
+                <button onclick="exitToDashboard()" class="flex items-center gap-2 px-4 py-2 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 rounded-xl font-bold transition-all text-sm">
+                    <i data-lucide="arrow-left" class="w-4 h-4"></i> Exit to Hub
+                </button>
+                <div class="flex items-center gap-3">
+                    <span id="pm-timer-badge" class="px-3 py-1 bg-amber-500 text-white text-xs font-black rounded-full uppercase">Ready</span>
+                    <span id="pm-score-display" class="font-bold text-indigo-500 dark:text-indigo-400">Score: 0</span>
+                </div>
+            </div>
+
+            <div class="bg-white dark:bg-[#111827] rounded-3xl p-5 border border-slate-100 dark:border-slate-800/80 shadow-lg flex flex-col gap-4 text-center">
+                <div>
+                    <h2 class="text-2xl font-black text-slate-800 dark:text-white">Picture Match Joy</h2>
+                    <p class="text-slate-500 dark:text-slate-400 text-sm mt-1">Tap matching pairs of items. Study the board during initial view time!</p>
+                </div>
+
+                <!-- Game Mode / Difficulty Configuration -->
+                <div class="bg-slate-50 dark:bg-slate-900 rounded-2xl p-4 space-y-3 text-left">
+                    <div>
+                        <span class="text-xs font-bold uppercase tracking-wide text-slate-400">1. Select Difficulty:</span>
+                        <div class="flex gap-2 mt-1.5">
+                            <button onclick="setPmDifficulty('easy')" id="pm-diff-easy" class="px-3 py-2 rounded-xl text-xs font-extrabold uppercase transition-all bg-indigo-500 text-white">Easy (6 pairs)</button>
+                            <button onclick="setPmDifficulty('medium')" id="pm-diff-medium" class="px-3 py-2 rounded-xl text-xs font-extrabold uppercase transition-all bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300">Medium (8 pairs)</button>
+                            <button onclick="setPmDifficulty('hard')" id="pm-diff-hard" class="px-3 py-2 rounded-xl text-xs font-extrabold uppercase transition-all bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300">Hard (12 pairs)</button>
+                        </div>
+                    </div>
+                    <div>
+                        <span class="text-xs font-bold uppercase tracking-wide text-slate-400">2. Select Memorize View Time:</span>
+                        <div class="flex gap-2 mt-1.5">
+                            <button onclick="setPmViewTime(2)" id="pm-time-2" class="px-3 py-2 rounded-xl text-xs font-extrabold uppercase transition-all bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300">2 Seconds</button>
+                            <button onclick="setPmViewTime(5)" id="pm-time-5" class="px-3 py-2 rounded-xl text-xs font-extrabold uppercase transition-all bg-indigo-500 text-white">5 Seconds</button>
+                            <button onclick="setPmViewTime(10)" id="pm-time-10" class="px-3 py-2 rounded-xl text-xs font-extrabold uppercase transition-all bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300">10 Seconds</button>
+                        </div>
+                    </div>
+                    <button onclick="initPictureMatch()" class="w-full bg-emerald-500 hover:bg-emerald-600 text-white font-extrabold py-3 rounded-xl transition-all shadow-md shadow-emerald-500/10">
+                        Generate & Start Matching Board
+                    </button>
+                </div>
+
+                <!-- Status Panel -->
+                <div class="flex justify-around items-center bg-slate-50 dark:bg-slate-900 py-3 rounded-2xl text-sm font-bold">
+                    <div>Moves: <span id="pm-moves" class="text-indigo-500">0</span></div>
+                    <div>Remaining: <span id="pm-matches" class="text-emerald-500">0</span></div>
+                </div>
+
+                <!-- Helper Tools: Hint & Give Up -->
+                <div class="grid grid-cols-2 gap-3">
+                    <button onclick="pmTriggerHint()" class="flex items-center justify-center gap-2 py-2.5 bg-amber-50 hover:bg-amber-100 dark:bg-amber-950/20 text-amber-600 dark:text-amber-400 rounded-xl text-sm font-bold transition-all">
+                        <i data-lucide="lightbulb" class="w-4 h-4"></i> Hint (<span id="pm-hint-count">3</span>)
+                    </button>
+                    <button onclick="pmTriggerGiveUp()" class="flex items-center justify-center gap-2 py-2.5 bg-red-50 hover:bg-red-100 dark:bg-red-950/20 text-red-600 dark:text-red-400 rounded-xl text-sm font-bold transition-all">
+                        <i data-lucide="eye" class="w-4 h-4"></i> Give Up
+                    </button>
+                </div>
+
+                <!-- The Game Board Grid -->
+                <div id="pm-board" class="grid grid-cols-4 gap-3 max-w-sm mx-auto w-full mt-2">
+                    <!-- Cards will render here -->
+                </div>
+            </div>
+        </section>
+
+        <!-- --- GAME: WORD SEARCH --- -->
+        <section id="game-word_search" class="hidden flex-col gap-4">
+            <div class="flex items-center justify-between py-2">
+                <button onclick="exitToDashboard()" class="flex items-center gap-2 px-4 py-2 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 rounded-xl font-bold transition-all text-sm">
+                    <i data-lucide="arrow-left" class="w-4 h-4"></i> Exit to Hub
+                </button>
+                <div class="flex items-center gap-3">
+                    <span id="ws-score-display" class="font-bold text-indigo-500 dark:text-indigo-400">Score: 0</span>
+                </div>
+            </div>
+
+            <div class="bg-white dark:bg-[#111827] rounded-3xl p-5 border border-slate-100 dark:border-slate-800/80 shadow-lg flex flex-col gap-4 text-center">
+                <div>
+                    <h2 class="text-2xl font-black text-slate-800 dark:text-white">Word Search</h2>
+                    <p class="text-slate-500 dark:text-slate-400 text-sm mt-1">Select Difficulty, then tap first & last letters of found words!</p>
+                </div>
+
+                <!-- Difficulty configuration buttons -->
+                <div class="flex justify-center gap-2">
+                    <button onclick="setWsDifficulty('easy')" id="ws-btn-easy" class="px-4 py-2 rounded-xl text-xs font-bold uppercase bg-indigo-500 text-white transition-all">Easy</button>
+                    <button onclick="setWsDifficulty('medium')" id="ws-btn-medium" class="px-4 py-2 rounded-xl text-xs font-bold uppercase bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 transition-all">Medium</button>
+                    <button onclick="setWsDifficulty('hard')" id="ws-btn-hard" class="px-4 py-2 rounded-xl text-xs font-bold uppercase bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 transition-all">Hard</button>
+                </div>
+
+                <!-- Help Actions: Hint and Give Up -->
+                <div class="grid grid-cols-2 gap-3 max-w-sm mx-auto w-full">
+                    <button onclick="wsTriggerHint()" class="flex items-center justify-center gap-2 py-2.5 bg-amber-50 hover:bg-amber-100 dark:bg-amber-950/20 text-amber-600 dark:text-amber-400 rounded-xl text-sm font-bold transition-all">
+                        <i data-lucide="lightbulb" class="w-4 h-4"></i> Show Hint
+                    </button>
+                    <button onclick="wsTriggerGiveUp()" class="flex items-center justify-center gap-2 py-2.5 bg-red-50 hover:bg-red-100 dark:bg-red-950/20 text-red-600 dark:text-red-400 rounded-xl text-sm font-bold transition-all">
+                        <i data-lucide="eye" class="w-4 h-4"></i> Give Up
+                    </button>
+                </div>
+
+                <!-- Word List Indicators -->
+                <div class="flex flex-wrap justify-center gap-2" id="ws-wordlist">
+                    <!-- Dynamic word chips -->
+                </div>
+
+                <!-- Word Search Grid Board -->
+                <div class="bg-slate-50 dark:bg-slate-900 rounded-3xl p-3 inline-block mx-auto max-w-full overflow-hidden select-none">
+                    <div id="ws-board" class="grid gap-1.5 max-w-xs sm:max-w-md mx-auto">
+                        <!-- Custom dynamic Grid size -->
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- --- GAME: WORD RECALL --- -->
+        <section id="game-word_recall" class="hidden flex-col gap-4">
+            <div class="flex items-center justify-between py-2">
+                <button onclick="exitToDashboard()" class="flex items-center gap-2 px-4 py-2 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 rounded-xl font-bold transition-all text-sm">
+                    <i data-lucide="arrow-left" class="w-4 h-4"></i> Exit to Hub
+                </button>
+                <div class="flex items-center gap-3">
+                    <span id="wr-set-tracker" class="px-3 py-1 bg-purple-500 text-white text-xs font-bold rounded-lg uppercase">Set 1 of 3</span>
+                    <span id="wr-score-display" class="font-bold text-indigo-500 dark:text-indigo-400">Score: 0</span>
+                </div>
+            </div>
+
+            <div class="bg-white dark:bg-[#111827] rounded-3xl p-6 border border-slate-100 dark:border-slate-800/80 shadow-lg flex flex-col gap-6 text-center">
+                <div>
+                    <h2 class="text-2xl font-black text-slate-800 dark:text-white">Word Recall Trainer</h2>
+                    <p class="text-slate-500 dark:text-slate-400 text-sm mt-1">Memorize the words, then pick them correctly. Complete 3 full sets!</p>
+                </div>
+
+                <!-- Level & Timing Selector Configuration (Visible before session start) -->
+                <div id="wr-config-panel" class="bg-slate-50 dark:bg-slate-900 rounded-2xl p-4 space-y-4 text-left">
+                    <div>
+                        <span class="text-xs font-bold uppercase text-slate-400">1. Select Difficulty:</span>
+                        <div class="flex gap-2 mt-1.5">
+                            <button onclick="setWrLevel('easy')" id="wr-lvl-easy" class="px-3 py-2 rounded-xl text-xs font-bold uppercase transition-all bg-indigo-500 text-white">Easy (4 words)</button>
+                            <button onclick="setWrLevel('medium')" id="wr-lvl-medium" class="px-3 py-2 rounded-xl text-xs font-bold uppercase transition-all bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300">Medium (5 words)</button>
+                            <button onclick="setWrLevel('hard')" id="wr-lvl-hard" class="px-3 py-2 rounded-xl text-xs font-bold uppercase transition-all bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300">Hard (6 words)</button>
+                        </div>
+                    </div>
+                    <div>
+                        <span class="text-xs font-bold uppercase text-slate-400">2. Memorize Timer Limit:</span>
+                        <div class="flex gap-2 mt-1.5">
+                            <button onclick="setWrTimer(5)" id="wr-time-5" class="px-3 py-2 rounded-xl text-xs font-bold uppercase transition-all bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300">5 seconds</button>
+                            <button onclick="setWrTimer(8)" id="wr-time-8" class="px-3 py-2 rounded-xl text-xs font-bold uppercase transition-all bg-indigo-500 text-white">8 seconds</button>
+                            <button onclick="setWrTimer(10)" id="wr-time-10" class="px-3 py-2 rounded-xl text-xs font-bold uppercase transition-all bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300">10 seconds</button>
+                        </div>
+                    </div>
+                    <button onclick="startWrGameSession()" class="w-full bg-emerald-500 hover:bg-emerald-600 text-white font-extrabold py-3.5 rounded-xl transition-all shadow-md shadow-emerald-500/10">
+                        Start Exercise Series (3 Sets)
+                    </button>
+                </div>
+
+                <!-- Word Recall Phase 1: Memorization -->
+                <div id="wr-phase-memorize" class="hidden space-y-6">
+                    <div class="p-4 bg-amber-50 dark:bg-amber-950/20 border border-amber-100 dark:border-amber-900/30 rounded-2xl text-amber-700 dark:text-amber-400 text-sm font-bold flex items-center justify-center gap-2">
+                        <i data-lucide="timer" class="w-4 h-4 animate-pulse"></i>
+                        <span>Memorize these words! Time remaining: <strong id="wr-timer" class="text-lg">8</strong> seconds</span>
+                    </div>
+
+                    <div id="wr-words-to-memorize" class="grid grid-cols-2 gap-3 max-w-sm mx-auto">
+                        <!-- Dynamic memorize list -->
+                    </div>
+                </div>
+
+                <!-- Word Recall Phase 2: Selection Matrix -->
+                <div id="wr-phase-recall" class="hidden space-y-6">
+                    <div class="p-4 bg-indigo-50 dark:bg-indigo-950/20 border border-indigo-100 dark:border-indigo-900/30 rounded-2xl text-indigo-700 dark:text-indigo-400 text-sm font-bold">
+                        Choose the correct words that were shown!
+                    </div>
+
+                    <!-- Action helpers -->
+                    <div class="grid grid-cols-2 gap-3 max-w-xs mx-auto">
+                        <button onclick="wrTriggerHint()" class="flex items-center justify-center gap-2 py-2 bg-amber-50 hover:bg-amber-100 dark:bg-amber-950/20 text-amber-600 dark:text-amber-400 rounded-xl text-xs font-bold transition-all">
+                            <i data-lucide="lightbulb" class="w-4 h-4"></i> Hint Reveal
+                        </button>
+                        <button onclick="wrTriggerGiveUp()" class="flex items-center justify-center gap-2 py-2 bg-red-50 hover:bg-red-100 dark:bg-red-950/20 text-red-600 dark:text-red-400 rounded-xl text-xs font-bold transition-all">
+                            <i data-lucide="eye" class="w-4 h-4"></i> Give Up
+                        </button>
+                    </div>
+
+                    <div id="wr-words-matrix" class="grid grid-cols-3 gap-3 max-w-sm mx-auto">
+                        <!-- Multiple option choices -->
+                    </div>
+
+                    <button onclick="submitWordRecallSet()" class="w-full max-w-xs mx-auto bg-emerald-500 hover:bg-emerald-600 text-white font-bold py-3 px-6 rounded-2xl shadow-lg transition-transform active:scale-98">
+                        Confirm Choices
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- --- GAME: DIGIT DASH --- -->
+        <section id="game-digit_dash" class="hidden flex-col gap-4">
+            <div class="flex items-center justify-between py-2">
+                <button onclick="exitToDashboard()" class="flex items-center gap-2 px-4 py-2 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 rounded-xl font-bold transition-all text-sm">
+                    <i data-lucide="arrow-left" class="w-4 h-4"></i> Exit to Hub
+                </button>
+                <div class="flex items-center gap-3">
+                    <span id="dd-set-tracker" class="px-3 py-1 bg-purple-500 text-white text-xs font-bold rounded-lg uppercase">Set 1 of 6</span>
+                    <span id="dd-score-display" class="font-bold text-indigo-500 dark:text-indigo-400">Score: 0</span>
+                </div>
+            </div>
+
+            <div class="bg-white dark:bg-[#111827] rounded-3xl p-6 border border-slate-100 dark:border-slate-800/80 shadow-lg flex flex-col gap-6 text-center">
+                <div>
+                    <h2 class="text-2xl font-black text-slate-800 dark:text-white">Digit Dash Memory</h2>
+                    <p class="text-slate-500 dark:text-slate-400 text-sm mt-1">A circular countdown will show numbers to memorize. Re-type them to complete each set! (6 sets total)</p>
+                </div>
+
+                <!-- Setup View -->
+                <div id="dd-setup-panel" class="space-y-4">
+                    <div class="bg-slate-50 dark:bg-slate-900 rounded-2xl p-4 space-y-4 text-left">
+                        <div>
+                            <span class="text-xs font-bold uppercase text-slate-400">1. Select Digit Length:</span>
+                            <div class="flex gap-2 mt-1.5">
+                                <button onclick="setDdDigitLength(7)" id="dd-len-7" class="px-3 py-2 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 rounded-xl text-xs font-bold">7 Digits</button>
+                                <button onclick="setDdDigitLength(8)" id="dd-len-8" class="px-3 py-2 bg-indigo-500 text-white rounded-xl text-xs font-bold">8 Digits</button>
+                                <button onclick="setDdDigitLength(9)" id="dd-len-9" class="px-3 py-2 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 rounded-xl text-xs font-bold">9 Digits</button>
+                                <button onclick="setDdDigitLength(10)" id="dd-len-10" class="px-3 py-2 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 rounded-xl text-xs font-bold">10 Digits</button>
+                            </div>
+                        </div>
+                        <div>
+                            <span class="text-xs font-bold uppercase text-slate-400">2. Select Memorize Time:</span>
+                            <div class="flex gap-2 mt-1.5">
+                                <button onclick="setDdViewTime(10)" id="dd-time-10" class="px-3 py-2 bg-indigo-500 text-white rounded-xl text-xs font-bold">10 Seconds</button>
+                                <button onclick="setDdViewTime(15)" id="dd-time-15" class="px-3 py-2 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 rounded-xl text-xs font-bold">15 Seconds</button>
+                                <button onclick="setDdViewTime(20)" id="dd-time-20" class="px-3 py-2 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 rounded-xl text-xs font-bold">20 Seconds</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button onclick="startDdChallengeSeries()" class="w-full bg-indigo-500 hover:bg-indigo-600 text-white font-black text-lg py-4 rounded-2xl shadow-lg active:scale-95 transition-transform">
+                        Start 6-Set Digit Dash Challenge
+                    </button>
+                </div>
+
+                <!-- Memorize View with Circle Countdown -->
+                <div id="dd-memorize-panel" class="hidden flex flex-col items-center justify-center space-y-6 py-6">
+                    <div class="text-[11px] font-bold text-amber-500 uppercase tracking-widest">Memorize Now!</div>
+                    
+                    <!-- Circular Countdown Ring Component -->
+                    <div class="relative w-56 h-52 flex items-center justify-center bg-indigo-50 dark:bg-indigo-950/20 rounded-full border border-indigo-100 dark:border-indigo-900/40 shadow-inner px-4 overflow-hidden">
+                        <!-- SVG Ring -->
+                        <svg class="circle-timer-svg absolute inset-0 w-full h-full" viewBox="0 0 100 100">
+                            <circle cx="50" cy="50" r="45" fill="none" stroke="#e2e8f0" stroke-width="6" class="dark:stroke-slate-800"></circle>
+                            <circle id="dd-ring-progress" cx="50" cy="50" r="45" fill="none" stroke="#6366f1" stroke-width="6" stroke-dasharray="283" stroke-dashoffset="0" stroke-linecap="round" class="transition-all duration-1000 ease-linear"></circle>
+                        </svg>
+                        
+                        <!-- Digit Label inside circle - DYNAMIC RESIZING HANDLER IN JAVASCRIPT -->
+                        <div id="dd-display-digits" class="absolute font-black tracking-normal text-indigo-600 dark:text-indigo-400 drop-shadow-sm select-none text-center font-sans w-[80%] mx-auto whitespace-nowrap overflow-hidden text-ellipsis">
+                            12345678
+                        </div>
+                    </div>
+                    
+                    <div class="text-sm font-extrabold text-slate-500 dark:text-slate-400">
+                        Timer counts down: <span id="dd-circle-sec-display" class="text-amber-500 font-black text-lg">10</span>s
+                    </div>
+                </div>
+
+                <!-- Input View with Large Buttons -->
+                <div id="dd-input-panel" class="hidden space-y-4">
+                    <div class="text-xs font-bold text-slate-400 uppercase tracking-wider">Type the digits you memorized:</div>
+                    <input id="dd-typed-input" type="text" readonly class="w-full text-center text-4xl font-extrabold text-slate-800 dark:text-white bg-slate-50 dark:bg-slate-900 border-2 border-slate-200 dark:border-slate-700 rounded-2xl py-3 focus:outline-none tracking-widest placeholder:text-slate-300"/>
+
+                    <!-- Large keypad matrix -->
+                    <div class="grid grid-cols-3 gap-2.5 max-w-xs mx-auto">
+                        <button onclick="ddKeypress('1')" class="py-4 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 rounded-xl text-xl font-bold active:scale-95 transition-transform">1</button>
+                        <button onclick="ddKeypress('2')" class="py-4 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 rounded-xl text-xl font-bold active:scale-95 transition-transform">2</button>
+                        <button onclick="ddKeypress('3')" class="py-4 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 rounded-xl text-xl font-bold active:scale-95 transition-transform">3</button>
+                        <button onclick="ddKeypress('4')" class="py-4 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 rounded-xl text-xl font-bold active:scale-95 transition-transform">4</button>
+                        <button onclick="ddKeypress('5')" class="py-4 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 rounded-xl text-xl font-bold active:scale-95 transition-transform">5</button>
+                        <button onclick="ddKeypress('6')" class="py-4 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 rounded-xl text-xl font-bold active:scale-95 transition-transform">6</button>
+                        <button onclick="ddKeypress('7')" class="py-4 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 rounded-xl text-xl font-bold active:scale-95 transition-transform">7</button>
+                        <button onclick="ddKeypress('8')" class="py-4 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 rounded-xl text-xl font-bold active:scale-95 transition-transform">8</button>
+                        <button onclick="ddKeypress('9')" class="py-4 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 rounded-xl text-xl font-bold active:scale-95 transition-transform">9</button>
+                        <button onclick="ddKeypress('C')" class="py-4 bg-red-50 dark:bg-red-950/20 text-red-500 rounded-xl text-lg font-bold active:scale-95 transition-transform">Delete</button>
+                        <button onclick="ddKeypress('0')" class="py-4 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 rounded-xl text-xl font-bold active:scale-95 transition-transform">0</button>
+                        <button onclick="ddSubmit()" class="py-4 bg-indigo-500 hover:bg-indigo-600 text-white rounded-xl text-lg font-bold active:scale-95 transition-transform">Submit</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- --- GAME: SUDOKU --- -->
+        <section id="game-sudoku" class="hidden flex-col gap-4">
+            <div class="flex items-center justify-between py-2">
+                <button onclick="exitToDashboard()" class="flex items-center gap-2 px-4 py-2 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 rounded-xl font-bold transition-all text-sm">
+                    <i data-lucide="arrow-left" class="w-4 h-4"></i> Exit to Hub
+                </button>
+                <div class="flex items-center gap-3">
+                    <span id="sudoku-timer-display" class="px-3 py-1 bg-slate-100 dark:bg-slate-800 rounded-lg text-sm font-bold">Time: 00:00</span>
+                    <span id="sudoku-score-display" class="font-bold text-indigo-500 dark:text-indigo-400">Score: 0</span>
+                </div>
+            </div>
+
+            <div class="bg-white dark:bg-[#111827] rounded-3xl p-5 border border-slate-100 dark:border-slate-800/80 shadow-lg flex flex-col gap-4 text-center">
+                <div>
+                    <h2 class="text-2xl font-black text-slate-800 dark:text-white">Sudoku Joy</h2>
+                    <p class="text-slate-500 dark:text-slate-400 text-sm mt-1">Tap a white box on the board, then select a number from the grid below!</p>
+                </div>
+
+                <!-- Helper Actions: Hint & Give Up -->
+                <div class="grid grid-cols-2 gap-3 max-w-sm mx-auto w-full">
+                    <button onclick="sudokuTriggerHint()" class="flex items-center justify-center gap-2 py-2.5 bg-amber-50 hover:bg-amber-100 dark:bg-amber-950/20 text-amber-600 dark:text-amber-400 rounded-xl text-sm font-bold transition-all">
+                        <i data-lucide="lightbulb" class="w-4 h-4"></i> Fill 1 Hint
+                    </button>
+                    <button onclick="sudokuTriggerGiveUp()" class="flex items-center justify-center gap-2 py-2.5 bg-red-50 hover:bg-red-100 dark:bg-red-950/20 text-red-600 dark:text-red-400 rounded-xl text-sm font-bold transition-all">
+                        <i data-lucide="eye" class="w-4 h-4"></i> Give Up
+                    </button>
+                </div>
+
+                <!-- Sudoku Board Wrapper -->
+                <div class="mx-auto bg-slate-100 dark:bg-slate-900 p-2.5 rounded-2xl w-full max-w-sm">
+                    <div id="sudoku-board" class="grid grid-cols-6 gap-1 sm:gap-1.5 w-full">
+                        <!-- 6x6 Sudoku elements -->
+                    </div>
+                </div>
+
+                <!-- Keypad Controls -->
+                <div class="space-y-2">
+                    <div class="text-xs font-bold text-slate-400 uppercase">Click below to place:</div>
+                    <div class="grid grid-cols-6 gap-2 max-w-sm mx-auto">
+                        <button onclick="sudokuNumberSelect(1)" class="py-3 bg-indigo-50 hover:bg-indigo-100 dark:bg-slate-800 text-indigo-600 dark:text-indigo-400 rounded-xl text-lg font-black active:scale-95 transition-transform">1</button>
+                        <button onclick="sudokuNumberSelect(2)" class="py-3 bg-indigo-50 hover:bg-indigo-100 dark:bg-slate-800 text-indigo-600 dark:text-indigo-400 rounded-xl text-lg font-black active:scale-95 transition-transform">2</button>
+                        <button onclick="sudokuNumberSelect(3)" class="py-3 bg-indigo-50 hover:bg-indigo-100 dark:bg-slate-800 text-indigo-600 dark:text-indigo-400 rounded-xl text-lg font-black active:scale-95 transition-transform">3</button>
+                        <button onclick="sudokuNumberSelect(4)" class="py-3 bg-indigo-50 hover:bg-indigo-100 dark:bg-slate-800 text-indigo-600 dark:text-indigo-400 rounded-xl text-lg font-black active:scale-95 transition-transform">4</button>
+                        <button onclick="sudokuNumberSelect(5)" class="py-3 bg-indigo-50 hover:bg-indigo-100 dark:bg-slate-800 text-indigo-600 dark:text-indigo-400 rounded-xl text-lg font-black active:scale-95 transition-transform">5</button>
+                        <button onclick="sudokuNumberSelect(6)" class="py-3 bg-indigo-50 hover:bg-indigo-100 dark:bg-slate-800 text-indigo-600 dark:text-indigo-400 rounded-xl text-lg font-black active:scale-95 transition-transform">6</button>
+                    </div>
+                    <button onclick="sudokuClearCell()" class="w-full max-w-xs mx-auto py-2.5 bg-red-50 hover:bg-red-100 dark:bg-red-950/20 text-red-500 text-xs font-bold uppercase rounded-xl tracking-wide active:scale-95 transition-transform">
+                        Clear Selected Cell
+                    </button>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- ============================================== -->
+    <!-- GLOBAL GAME COMPLETION SUMMARIES (MODAL) -->
+    <!-- ============================================== -->
+    <div id="modal-completion" class="hidden fixed inset-0 bg-slate-950/60 backdrop-blur-sm flex items-center justify-center p-4 z-[100] transition-opacity">
+        <div class="bg-white dark:bg-[#111827] w-full max-w-md rounded-3xl p-6 sm:p-8 shadow-2xl border border-slate-100 dark:border-slate-800/80 text-center space-y-6 transform scale-100 transition-transform">
+            
+            <div class="inline-flex p-4 rounded-full bg-emerald-50 dark:bg-emerald-950/40 text-emerald-500">
+                <i data-lucide="badge-check" class="w-12 h-12"></i>
+            </div>
+
+            <div>
+                <h3 id="modal-title" class="text-2xl font-black text-slate-800 dark:text-white">Fantastic Workout!</h3>
+                <p id="modal-feedback" class="text-slate-500 dark:text-slate-400 text-sm sm:text-base leading-relaxed mt-2">
+                    Your neurons are firing, keeping your processing speed at an optimal rate.
+                </p>
+            </div>
+
+            <div class="bg-slate-50 dark:bg-slate-900 rounded-2xl p-4 flex flex-col gap-2 border border-slate-100 dark:border-slate-800/40 text-sm text-left">
+                <div class="flex justify-between">
+                    <span class="text-slate-400 font-bold uppercase text-xs">Game Played:</span>
+                    <strong id="modal-game-name" class="text-slate-700 dark:text-slate-200">Picture Match</strong>
+                </div>
+                <div class="flex justify-between">
+                    <span class="text-slate-400 font-bold uppercase text-xs">Score Gained:</span>
+                    <strong id="modal-game-score" class="text-indigo-500">+150 pts</strong>
+                </div>
+                <div class="flex justify-between">
+                    <span class="text-slate-400 font-bold uppercase text-xs">Date & Time:</span>
+                    <strong id="modal-game-date" class="text-slate-700 dark:text-slate-200">--/--/----</strong>
+                </div>
+            </div>
+
+            <div class="flex flex-col gap-2">
+                <!-- WhatsApp Share -->
+                <button onclick="shareGameResult()" class="w-full bg-[#25D366] hover:bg-[#20ba5a] text-white font-bold py-3.5 rounded-2xl flex items-center justify-center gap-2 text-base active:scale-98 transition-all">
+                    <i data-lucide="share-2" class="w-5 h-5"></i>
+                    <span>Share on WhatsApp</span>
+                </button>
+                <!-- Return to Hub -->
+                <button onclick="closeCompletionModal()" class="w-full bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-bold py-3 px-6 rounded-2xl transition-colors">
+                    Back to Hub
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- PROFILE/USER DETAILS MODAL -->
+    <div id="modal-profile" class="hidden fixed inset-0 bg-slate-950/60 backdrop-blur-sm flex items-center justify-center p-4 z-[100]">
+        <div class="bg-white dark:bg-[#111827] w-full max-w-sm rounded-3xl p-6 shadow-2xl border border-slate-100 dark:border-slate-800 text-center space-y-6">
+            <div class="flex items-center justify-between pb-2 border-b border-slate-200 dark:border-slate-800">
+                <h3 class="text-lg font-black">Your MindGym Profile</h3>
+                <button onclick="closeProfileModal()" class="p-1 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800"><i data-lucide="x" class="w-5 h-5"></i></button>
+            </div>
+            
+            <div class="space-y-3 text-left">
+                <div>
+                    <label class="text-xs font-bold text-slate-400 uppercase">Registered Mobile</label>
+                    <div id="prof-mobile" class="text-lg font-bold mt-1 text-indigo-500">None</div>
+                </div>
+                <div class="grid grid-cols-2 gap-2 pt-2">
+                    <div class="bg-slate-50 dark:bg-slate-900 p-3 rounded-xl text-center">
+                        <span class="text-xs font-bold text-slate-400">Streak</span>
+                        <div id="prof-streak" class="text-xl font-black mt-1">1 Day</div>
+                    </div>
+                    <div class="bg-slate-50 dark:bg-slate-900 p-3 rounded-xl text-center">
+                        <span class="text-xs font-bold text-slate-400">Total Score</span>
+                        <div id="prof-score" class="text-xl font-black mt-1">0 pts</div>
+                    </div>
+                </div>
+            </div>
+
+            <button onclick="logoutUser()" class="w-full bg-red-50 hover:bg-red-100 dark:bg-red-950/20 text-red-500 font-bold py-3 rounded-xl text-sm transition-colors">
+                Switch Mobile Number
+            </button>
+        </div>
+    </div>
+
+    <!-- ============================================== -->
+    <!-- APPLICATION JAVASCRIPT LOGIC -->
+    <!-- ============================================== -->
+    <script>
+        // Global State Controller
+        let currentScreen = "login";
+        let userMobile = "";
+        let playerStats = {
+            totalScore: 0,
+            streak: 1,
+            history: []
+        };
+        const apiKey = ""; 
+
+        // Shared Completed Game Container for sharing on WhatsApp
+        let currentShareData = null;
+
+        // On Load Configuration
+        window.onload = function() {
+            safeCreateIcons();
+            initTheme();
+            checkExistingSession();
+            refreshAITip();
+            startCalendarAndClockTicks();
+        };
+
+        // Theme Mechanics
+        function initTheme() {
+            const savedTheme = localStorage.getItem('theme') || 'light';
+            document.documentElement.className = savedTheme;
+            updateThemeIcon(savedTheme);
+        }
+
+        function toggleTheme() {
+            const isDark = document.documentElement.classList.contains('dark');
+            const newTheme = isDark ? 'light' : 'dark';
+            document.documentElement.className = newTheme;
+            localStorage.setItem('theme', newTheme);
+            updateThemeIcon(newTheme);
+        }
+
+        function updateThemeIcon(theme) {
+            const icon = document.getElementById('theme-icon');
+            if (icon) {
+                if (theme === 'dark') {
+                    icon.setAttribute('data-lucide', 'moon');
+                } else {
+                    icon.setAttribute('data-lucide', 'sun');
+                }
+            }
+            safeCreateIcons();
+        }
+
+        function safeCreateIcons() {
+            try {
+                if (typeof lucide !== 'undefined' && lucide.createIcons) {
+                    lucide.createIcons();
+                }
+            } catch (err) {
+                console.warn("Lucide asset load bypassed dynamically:", err);
+            }
+        }
+
+        // Gregorian & Lunar Chinese calendar tick logic
+        function startCalendarAndClockTicks() {
+            function updateDateTimeDisplay() {
+                const now = new Date();
+                
+                // 1. Gregorian formatting
+                const gregOptions = { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' };
+                const gregStr = now.toLocaleDateString('en-GB', gregOptions);
+                const gregEl = document.getElementById('calendar-gregorian');
+                if (gregEl) gregEl.textContent = gregStr;
+
+                // 2. Lunar approximation lookup algorithm for elderly reference
+                const lunarStr = getApproxLunarDate(now);
+                const lunarEl = document.getElementById('calendar-lunar');
+                if (lunarEl) lunarEl.textContent = lunarStr;
+
+                // 3. Ticking clock
+                const timeStr = now.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false });
+                const clockEl = document.getElementById('dashboard-clock');
+                if (clockEl) clockEl.textContent = timeStr;
+            }
+
+            updateDateTimeDisplay();
+            setInterval(updateDateTimeDisplay, 1000);
+        }
+
+        // Accurate Chinese Lunar calendar calculation table for years around 2026
+        function getApproxLunarDate(solarDate) {
+            const refCNY = new Date(2026, 1, 17); // Month 1 is February in JS
+            const diffTime = solarDate - refCNY;
+            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+            // Basic lunar month cycle values in 2026:
+            const lunarMonths = [30, 30, 29, 30, 29, 30, 29, 30, 29, 30, 30, 29];
+            const chineseMonths = ["正月", "二月", "三月", "四月", "五月", "六月", "七月", "八月", "九月", "十月", "冬月", "腊月"];
+            const chineseDays = [
+                "初一", "初二", "初三", "初四", "初五", "初六", "初七", "初八", "初九", "初十",
+                "十一", "十二", "十三", "十四", "十五", "十六", "十七", "十八", "十九", "二十",
+                "廿一", "廿二", "廿三", "廿四", "廿五", "廿六", "廿7", "廿八", "廿九", "三十"
+            ];
+
+            if (diffDays >= 0 && diffDays < 354) {
+                let accumulated = 0;
+                let monthIdx = 0;
+                let dayIdx = 0;
+
+                for (let i = 0; i < lunarMonths.length; i++) {
+                    if (accumulated + lunarMonths[i] > diffDays) {
+                        monthIdx = i;
+                        dayIdx = diffDays - accumulated;
+                        break;
+                    }
+                    accumulated += lunarMonths[i];
+                }
+
+                const cMonth = chineseMonths[monthIdx];
+                const cDay = chineseDays[dayIdx];
+                return `丙午马年 ${cMonth}${cDay} (Lunar Calendar)`;
+            } else {
+                return `丙午马年 四月廿二 (Lunar Calendar)`;
+            }
+        }
+
+        // Setup Session Checking
+        function checkExistingSession() {
+            const savedMobile = localStorage.getItem('mindgym_mobile');
+            if (savedMobile) {
+                userMobile = savedMobile;
+                loadPlayerStats(savedMobile);
+                showScreen('dashboard');
+                const pBtn = document.getElementById('profile-btn');
+                if (pBtn) pBtn.classList.remove('hidden');
+                const badge = document.getElementById('player-badge');
+                if (badge) badge.textContent = `Tracking: +${userMobile}`;
+            } else {
+                showScreen('login');
+            }
+        }
+
+        function loginUser() {
+            const input = document.getElementById('mobile-number').value.trim();
+            if (!input || input.length < 8) {
+                alert("Please enter a valid mobile number (at least 8 digits) to register/login.");
+                return;
+            }
+            userMobile = input;
+            localStorage.setItem('mindgym_mobile', userMobile);
+            loadPlayerStats(userMobile);
+            showScreen('dashboard');
+            const pBtn = document.getElementById('profile-btn');
+            if (pBtn) pBtn.classList.remove('hidden');
+            const badge = document.getElementById('player-badge');
+            if (badge) badge.textContent = `Tracking: +${userMobile}`;
+            refreshAITip();
+        }
+
+        function bypassLogin() {
+            userMobile = "Guest";
+            loadPlayerStats(userMobile);
+            showScreen('dashboard');
+            const pBtn = document.getElementById('profile-btn');
+            if (pBtn) pBtn.classList.remove('hidden');
+            const badge = document.getElementById('player-badge');
+            if (badge) badge.textContent = `Guest Player`;
+        }
+
+        function logoutUser() {
+            localStorage.removeItem('mindgym_mobile');
+            userMobile = "";
+            playerStats = { totalScore: 0, streak: 1, history: [] };
+            const pBtn = document.getElementById('profile-btn');
+            if (pBtn) pBtn.classList.add('hidden');
+            const badge = document.getElementById('player-badge');
+            if (badge) badge.textContent = "Interactive Cognitive Hub";
+            closeProfileModal();
+            showScreen('login');
+        }
+
+        function showScreen(screenId) {
+            currentScreen = screenId;
+            const screens = ['screen-login', 'screen-dashboard', 'game-learn_malay', 'game-picture_match', 'game-word_search', 'game-word_recall', 'game-digit_dash', 'game-sudoku'];
+            screens.forEach(s => {
+                const element = document.getElementById(s);
+                if (element) {
+                    if (s === 'game-' + screenId || s === 'screen-' + screenId) {
+                        element.classList.remove('hidden');
+                        element.classList.add('flex');
+                    } else {
+                        element.classList.add('hidden');
+                        element.classList.remove('flex');
+                    }
+                }
+            });
+        }
+
+        function exitToDashboard() {
+            showScreen('dashboard');
+            renderDashboardStats();
+            cleanupActiveGames();
+        }
+
+        // Clear ongoing game loops or values
+        function cleanupActiveGames() {
+            if (pmTimer) clearInterval(pmTimer);
+            if (wrTimerInterval) clearInterval(wrTimerInterval);
+            if (sudokuTimerInterval) clearInterval(sudokuTimerInterval);
+            if (ddTimerInterval) clearInterval(ddTimerInterval);
+            ddIsRunning = false;
+        }
+
+        // Stats Mechanics
+        function loadPlayerStats(mobile) {
+            const statsKey = `mindgym_stats_${mobile}`;
+            const localData = localStorage.getItem(statsKey);
+            try {
+                if (localData) {
+                    playerStats = JSON.parse(localData);
+                }
+            } catch (err) {
+                console.error("Failed to parse logs, restoring backup state schema.", err);
+            }
+
+            if (!playerStats || typeof playerStats !== 'object') {
+                playerStats = {};
+            }
+            if (typeof playerStats.totalScore !== 'number') playerStats.totalScore = 0;
+            if (typeof playerStats.streak !== 'number') playerStats.streak = 1;
+            if (!Array.isArray(playerStats.history)) playerStats.history = [];
+
+            renderDashboardStats();
+        }
+
+        function updatePlayerScore(gameName, scoreGained) {
+            playerStats.totalScore += scoreGained;
+            const todayStr = new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+            
+            if (playerStats.history.length > 0) {
+                const lastPlay = playerStats.history[0].date;
+                if (lastPlay !== todayStr) {
+                    playerStats.streak += 1;
+                }
+            }
+
+            playerStats.history.unshift({
+                game: gameName,
+                score: scoreGained,
+                date: todayStr,
+                time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })
+            });
+
+            if (playerStats.history.length > 10) {
+                playerStats.history.pop();
+            }
+
+            const statsKey = `mindgym_stats_${userMobile}`;
+            localStorage.setItem(statsKey, JSON.stringify(playerStats));
+            renderDashboardStats();
+        }
+
+        function renderDashboardStats() {
+            const userLabel = document.getElementById('dash-user-label');
+            if (userLabel) userLabel.textContent = userMobile;
+            const dScore = document.getElementById('dash-score');
+            if (dScore) dScore.textContent = playerStats.totalScore;
+            const dStreak = document.getElementById('dash-streak');
+            if (dStreak) dStreak.textContent = playerStats.streak;
+
+            const logContainer = document.getElementById('stats-log-list');
+            if (!logContainer) return;
+
+            if (playerStats.history.length === 0) {
+                logContainer.innerHTML = `<div class="text-center text-slate-400 py-6 text-sm">No exercises logged yet today. Complete a game to track!</div>`;
+                return;
+            }
+
+            logContainer.innerHTML = playerStats.history.map(item => `
+                <div class="flex justify-between items-center py-2 px-3 bg-slate-50 dark:bg-slate-900 rounded-xl border border-slate-100 dark:border-slate-800/60">
+                    <div>
+                        <div class="font-extrabold text-sm text-slate-700 dark:text-slate-300">${item.game}</div>
+                        <div class="text-[10px] text-slate-400">${item.date} • ${item.time}</div>
+                    </div>
+                    <span class="text-sm font-bold text-emerald-500">+${item.score} pts</span>
+                </div>
+            `).join('');
+        }
+
+        function clearHistory() {
+            if (confirm("Are you sure you want to clear your local game history?")) {
+                playerStats.history = [];
+                const statsKey = `mindgym_stats_${userMobile}`;
+                localStorage.setItem(statsKey, JSON.stringify(playerStats));
+                renderDashboardStats();
+            }
+        }
+
+        // ==============================================
+        // WHATSAPP SHARE RECORD DIGEST (DASHBOARD)
+        // ==============================================
+        function shareDashboardHistory() {
+            if (playerStats.history.length === 0) {
+                alert("Please log some exercise scores first before sharing your workout digest!");
+                return;
+            }
+            
+            const todayStr = new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+            let recordsString = "";
+            playerStats.history.slice(0, 5).forEach((item, idx) => {
+                recordsString += `${idx + 1}. *${item.game}*: +${item.score} pts (${item.time})\n`;
+            });
+
+            const text = `🧠 *MindGym Pro - Daily Cognitive Exercise Digest* 🧠\n\n🎯 *Player ID:* +${userMobile}\n📅 *Report Date:* ${todayStr}\n🔥 *Current Active Streak:* ${playerStats.streak} Day(s)\n🏆 *Lifetime Mental Score:* ${playerStats.totalScore} pts\n\n📈 *Recent Performance Records:*\n${recordsString}\nJoin me in protecting and keeping our minds agile, responsive, and sharp! Try MindGym Pro today!`;
+            const encodedText = encodeURIComponent(text);
+            const url = `https://api.whatsapp.com/send?text=${encodedText}`;
+            window.open(url, '_blank');
+        }
+
+        // ==============================================
+        // GEMINI AI INTEGRATION (Daily Micro-Coach Tip)
+        // ==============================================
+        const localEncouragements = [
+            "Solving puzzles like Word Search and Memory Match improves visual tracking and processes spatial relationships nicely!",
+            "Great job keeping your brain active. Your visual working memory is stronger today!",
+            "Did you know that numbers work with logical sequencing in your left brain? Keep doing Digit Dash!",
+            "Consistency beats intensity. Even 3 minutes of daily Sudoku protects neural pathways.",
+            "Memory strategies like word categorization can enhance your long-term verbal retrieval!"
+        ];
+
+        async function refreshAITip() {
+            const coachingBox = document.getElementById('ai-coaching-box');
+            const aiLoading = document.getElementById('ai-loading');
+            
+            if (!coachingBox) return;
+            aiLoading.classList.remove('hidden');
+            coachingBox.classList.add('opacity-40');
+
+            const randomLocal = localEncouragements[Math.floor(Math.random() * localEncouragements.length)];
+
+            const recentGame = playerStats.history[0]?.game || "Brain Exercises";
+            const currentTotal = playerStats.totalScore;
+            const systemPrompt = "You are an uplifting, warm, friendly cognitive health coach for senior citizens. Provide exactly 1 short, positive mental exercise micro-tip (under 25 words). Never include markdown formatting or quotation marks.";
+            const userQuery = `Write a daily brain fitness tip. My total score is ${currentTotal} and I enjoy playing ${recentGame}.`;
+
+            try {
+                const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        contents: [{ parts: [{ text: userQuery }] }],
+                        systemInstruction: { parts: [{ text: systemPrompt }] }
+                    })
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
+                    if (text && text.trim().length > 0) {
+                        coachingBox.textContent = `"${text.trim()}"`;
+                    } else {
+                        coachingBox.textContent = `"${randomLocal}"`;
+                    }
+                } else {
+                    coachingBox.textContent = `"${randomLocal}"`;
+                }
+            } catch (err) {
+                coachingBox.textContent = `"${randomLocal}"`;
+            } finally {
+                aiLoading.classList.add('hidden');
+                coachingBox.classList.remove('opacity-40');
+            }
+        }
+
+        // ==============================================
+        // WHATSAPP SHARE MECHANICS
+        // ==============================================
+        function showGameWin(gameName, scoreGained, description = "") {
+            const todayStr = new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+            
+            document.getElementById('modal-title').textContent = "Excellent Workout!";
+            document.getElementById('modal-game-name').textContent = gameName;
+            document.getElementById('modal-game-score').textContent = `+${scoreGained} pts`;
+            document.getElementById('modal-game-date').textContent = todayStr;
+            document.getElementById('modal-feedback').textContent = description || "You are training your concentration and focus beautifully.";
+            
+            currentShareData = {
+                game: gameName,
+                score: scoreGained,
+                date: todayStr
+            };
+
+            document.getElementById('modal-completion').classList.remove('hidden');
+            updatePlayerScore(gameName, scoreGained);
+        }
+
+        function closeCompletionModal() {
+            document.getElementById('modal-completion').classList.add('hidden');
+            exitToDashboard();
+        }
+
+        function shareGameResult() {
+            if (!currentShareData) return;
+            const text = `🧠 *MindGym Pro - Brain Workout Success Report!* 🧠\n\n🎯 *Exercise:* ${currentShareData.game}\n🔥 *Score:* +${currentShareData.score} pts\n📅 *Completed:* ${currentShareData.date}\n👤 *Player ID:* +${userMobile}\n\nJoin me in keeping our minds active, responsive, and sharp! Try out MindGym Pro today!`;
+            const encodedText = encodeURIComponent(text);
+            const url = `https://api.whatsapp.com/send?text=${encodedText}`;
+            window.open(url, '_blank');
+        }
+
+        function openProfileModal() {
+            document.getElementById('prof-mobile').textContent = userMobile === "Guest" ? "Guest Session" : `+${userMobile}`;
+            document.getElementById('prof-streak').textContent = `${playerStats.streak} Day(s)`;
+            document.getElementById('prof-score').textContent = `${playerStats.totalScore} pts`;
+            document.getElementById('modal-profile').classList.remove('hidden');
+        }
+
+        function closeProfileModal() {
+            document.getElementById('modal-profile').classList.add('hidden');
+        }
+
+
+        // ==============================================
+        // GAME: LEARN MALAY VOCAB (Singapore Primary Syllabus & TTS Aloud)
+        // ==============================================
+        let lmLevel = "easy";
+        let lmRoundCounter = 1;
+        let lmAccumulatedScore = 0;
+        let lmCurrentQuestion = null;
+        let lmIsRevealed = false;
+
+        // SG MOE Primary School syllabus targeted vocabulary
+        const lmDatabase = {
+            easy: [
+                { malay: "Selamat pagi", correct: "Good morning", decoys: ["Good evening", "How are you", "Thank you"] },
+                { malay: "Terima kasih", correct: "Thank you", decoys: ["Sorry", "You're welcome", "Please"] },
+                { malay: "Sama-sama", correct: "You're welcome", decoys: ["Hello", "Excuse me", "Yes"] },
+                { malay: "Murid", correct: "Student", decoys: ["Teacher", "Principal", "Parent"] },
+                { malay: "Guru", correct: "Teacher", decoys: ["Student", "Librarian", "Cleaner"] },
+                { malay: "Buku", correct: "Book", decoys: ["Pencil", "Ruler", "Bag"] },
+                { malay: "Sekolah", correct: "School", decoys: ["Market", "Hospital", "Park"] }
+            ],
+            medium: [
+                { malay: "Merah", correct: "Red", decoys: ["Blue", "Green", "Yellow"] },
+                { malay: "Biru", correct: "Blue", decoys: ["Red", "Orange", "Black"] },
+                { malay: "Hijau", correct: "Green", decoys: ["White", "Purple", "Yellow"] },
+                { malay: "Kuning", correct: "Yellow", decoys: ["Brown", "Pink", "Blue"] },
+                { malay: "Sembilan", correct: "Nine", decoys: ["Seven", "Ten", "Two"] },
+                { malay: "Sepuluh", correct: "Ten", decoys: ["Eight", "Five", "Nine"] },
+                { malay: "Sebelas", correct: "Eleven", decoys: ["Twelve", "Nine", "Six"] }
+            ],
+            hard: [
+                { malay: "Ibu bapa", correct: "Parents", decoys: ["Children", "Teachers", "Friends"] },
+                { malay: "Perpustakaan", correct: "Library", decoys: ["Classroom", "Canteen", "Playground"] },
+                { malay: "Menolong guru", correct: "Helping the teacher", decoys: ["Cleaning the yard", "Reading a book", "Line up"] },
+                { malay: "Beratur", correct: "Line up", decoys: ["Running around", "Sitting down", "Talking loudly"] },
+                { malay: "Bersih-bersih", correct: "Clean up", decoys: ["Plucking flowers", "Making noise", "Sleeping"] }
+            ]
+        };
+
+        function setMalayLevel(level) {
+            lmLevel = level;
+            ['easy', 'medium', 'hard'].forEach(l => {
+                const btn = document.getElementById(`lm-btn-${l}`);
+                if (btn) {
+                    if (l === level) {
+                        btn.className = "px-4 py-2 rounded-xl text-xs font-bold uppercase bg-amber-500 text-white transition-all";
+                    } else {
+                        btn.className = "px-4 py-2 rounded-xl text-xs font-bold uppercase bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 transition-all";
+                    }
+                }
+            });
+            startMalayGame();
+        }
+
+        function startMalayGame() {
+            lmRoundCounter = 1;
+            lmAccumulatedScore = 0;
+            loadMalayRound();
+        }
+
+        // Web Speech synthesis native engine for Singapore Primary Malay pronounciation
+        function speakMalayWordAloud(text) {
+            if ('speechSynthesis' in window) {
+                // Cancel ongoing synthesis to prevent queuing lag
+                window.speechSynthesis.cancel();
+                const utterance = new SpeechSynthesisUtterance(text);
+                utterance.lang = 'ms-MY'; // Native Bahasa Melayu tag
+                
+                // Fallback check matching Indonesian speech engines if Malay is local-absent
+                const voices = window.speechSynthesis.getVoices();
+                const matchedVoice = voices.find(v => v.lang.startsWith('ms') || v.lang.startsWith('id'));
+                if (matchedVoice) {
+                    utterance.voice = matchedVoice;
+                }
+                utterance.rate = 0.85; // Slightly slower for elderly clarity
+                window.speechSynthesis.speak(utterance);
+            }
+        }
+
+        function loadMalayRound() {
+            lmIsRevealed = false;
+            const tracker = document.getElementById('lm-round-tracker');
+            if (tracker) tracker.textContent = `Round ${lmRoundCounter} of 3`;
+            const scoreDisp = document.getElementById('lm-score-display');
+            if (scoreDisp) scoreDisp.textContent = `Score: ${playerStats.totalScore}`;
+
+            const pool = lmDatabase[lmLevel];
+            const randomIndex = Math.floor(Math.random() * pool.length);
+            lmCurrentQuestion = pool[randomIndex];
+
+            const phraseDisp = document.getElementById('lm-phrase-display');
+            if (phraseDisp) phraseDisp.textContent = lmCurrentQuestion.malay;
+
+            const rawOptions = [lmCurrentQuestion.correct, ...lmCurrentQuestion.decoys];
+            const shuffledOptions = rawOptions.sort(() => Math.random() - 0.5);
+
+            const optionsContainer = document.getElementById('lm-options-container');
+            if (optionsContainer) {
+                optionsContainer.innerHTML = "";
+                shuffledOptions.forEach((option, idx) => {
+                    const btn = document.createElement('button');
+                    btn.className = "w-full py-4 px-5 bg-slate-50 hover:bg-slate-100 dark:bg-slate-900 dark:hover:bg-slate-800 border-2 border-slate-200 dark:border-slate-800 rounded-2xl text-left font-extrabold transition-all text-slate-800 dark:text-slate-200 text-base active:scale-98 min-h-[48px]";
+                    btn.innerHTML = `<span class="inline-block w-8 h-8 rounded-full bg-slate-200 dark:bg-slate-800 text-slate-500 text-center leading-8 font-black mr-3 text-sm">${String.fromCharCode(65 + idx)}</span>${option}`;
+                    btn.onclick = () => selectMalayAnswer(option, btn);
+                    optionsContainer.appendChild(btn);
+                });
+            }
+        }
+
+        function selectMalayAnswer(chosenText, buttonElement) {
+            if (lmIsRevealed) return;
+            lmIsRevealed = true;
+
+            const isCorrect = chosenText === lmCurrentQuestion.correct;
+            if (isCorrect) {
+                buttonElement.className = "w-full py-4 px-5 bg-emerald-500 text-white border-2 border-emerald-400 rounded-2xl text-left font-extrabold transition-all text-base min-h-[48px]";
+                lmAccumulatedScore += 50;
+                
+                // Voice Aloud triggering on successful translation
+                speakMalayWordAloud(lmCurrentQuestion.malay);
+                
+                alert("Tahniah! (Congratulations!) Correct translation. Listen to the phrase spoken!");
+            } else {
+                buttonElement.className = "w-full py-4 px-5 bg-red-500 text-white border-2 border-red-400 rounded-2xl text-left font-extrabold transition-all text-base min-h-[48px]";
+                const optionButtons = Array.from(document.getElementById('lm-options-container').querySelectorAll('button'));
+                optionButtons.forEach(btn => {
+                    if (btn.textContent.includes(lmCurrentQuestion.correct)) {
+                        btn.className = "w-full py-4 px-5 bg-emerald-500 text-white border-2 border-emerald-400 rounded-2xl text-left font-extrabold transition-all text-base min-h-[48px]";
+                    }
+                });
+                alert(`Incorrect! The correct English translation is: "${lmCurrentQuestion.correct}"`);
+            }
+
+            setTimeout(() => {
+                if (lmRoundCounter < 3) {
+                    lmRoundCounter++;
+                    loadMalayRound();
+                } else {
+                    showGameWin("Learn Malay", lmAccumulatedScore, `Selesai! (Completed!) You learned MOE syllabus Malay vocabulary with a score of +${lmAccumulatedScore} points.`);
+                }
+            }, 1800);
+        }
+
+        function malayTriggerHint() {
+            if (lmIsRevealed) return;
+            const optionButtons = Array.from(document.getElementById('lm-options-container').querySelectorAll('button'));
+            let disabledCount = 0;
+            for (let btn of optionButtons) {
+                if (!btn.textContent.includes(lmCurrentQuestion.correct) && !btn.disabled) {
+                    btn.disabled = true;
+                    btn.className = "w-full py-4 px-5 bg-slate-200 dark:bg-slate-800 opacity-20 border-2 border-slate-300 dark:border-slate-900 rounded-2xl text-left font-extrabold transition-all text-base min-h-[48px] cursor-not-allowed";
+                    disabledCount++;
+                    if (disabledCount === 1) break;
+                }
+            }
+        }
+
+        function malayTriggerGiveUp() {
+            if (lmIsRevealed) return;
+            lmIsRevealed = true;
+            const optionButtons = Array.from(document.getElementById('lm-options-container').querySelectorAll('button'));
+            optionButtons.forEach(btn => {
+                if (btn.textContent.includes(lmCurrentQuestion.correct)) {
+                    btn.className = "w-full py-4 px-5 bg-emerald-500 text-white border-2 border-emerald-400 rounded-2xl text-left font-extrabold transition-all text-base min-h-[48px]";
+                } else {
+                    btn.className = "w-full py-4 px-5 bg-slate-200 dark:bg-slate-800 opacity-25 rounded-2xl text-left font-extrabold min-h-[48px]";
+                }
+            });
+
+            setTimeout(() => {
+                if (lmRoundCounter < 3) {
+                    lmRoundCounter++;
+                    loadMalayRound();
+                } else {
+                    showGameWin("Learn Malay", lmAccumulatedScore, `Completed vocabulary training session.`);
+                }
+            }, 2000);
+        }
+
+
+        // ==============================================
+        // GAME 1: PICTURE MATCH IMPLEMENTATION
+        // ==============================================
+        let pmDifficulty = "easy";
+        let pmViewLimitSecs = 5; 
+        let pmItems = ['🍎', '🍌', '🍇', '🍒', '🏀', '⚽', '🚗', '🎨', '🧩', '🎸', '🌟', '🍩', '🥑', '🍔', '🚀', '🎁', '🎈', '✈️'];
+        let pmCards = [];
+        let pmFlipped = [];
+        let pmMatchedCount = 0;
+        let pmMoves = 0;
+        let pmTimer = null;
+        let pmHintsLeft = 3;
+        let pmSolutionArray = [];
+
+        function setPmDifficulty(diff) {
+            pmDifficulty = diff;
+            ['easy', 'medium', 'hard'].forEach(d => {
+                const el = document.getElementById(`pm-diff-${d}`);
+                if (el) {
+                    if (d === diff) {
+                        el.className = "px-3 py-2 rounded-xl text-xs font-extrabold uppercase transition-all bg-indigo-500 text-white";
+                    } else {
+                        el.className = "px-3 py-2 rounded-xl text-xs font-extrabold uppercase transition-all bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300";
+                    }
+                }
+            });
+        }
+
+        function setPmViewTime(seconds) {
+            pmViewLimitSecs = seconds;
+            [2, 5, 10].forEach(s => {
+                const el = document.getElementById(`pm-time-${s}`);
+                if (el) {
+                    if (s === seconds) {
+                        el.className = "px-3 py-2 rounded-xl text-xs font-extrabold uppercase transition-all bg-indigo-500 text-white";
+                    } else {
+                        el.className = "px-3 py-2 rounded-xl text-xs font-extrabold uppercase transition-all bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300";
+                    }
+                }
+            });
+        }
+
+        function initPictureMatch() {
+            pmMoves = 0;
+            pmMatchedCount = 0;
+            pmFlipped = [];
+            pmHintsLeft = 3;
+            const hintCountEl = document.getElementById('pm-hint-count');
+            if (hintCountEl) hintCountEl.textContent = pmHintsLeft;
+
+            const pairsCount = pmDifficulty === 'easy' ? 6 : (pmDifficulty === 'medium' ? 8 : 12);
+            let currentSelection = pmItems.slice(0, pairsCount);
+            pmSolutionArray = [...currentSelection, ...currentSelection];
+            pmSolutionArray.sort(() => Math.random() - 0.5);
+
+            const board = document.getElementById('pm-board');
+            if (!board) return;
+            board.innerHTML = "";
+            board.className = `grid gap-2.5 max-w-sm mx-auto w-full grid-cols-4`;
+
+            pmSolutionArray.forEach((item, index) => {
+                const card = document.createElement('div');
+                card.className = "pm-card w-full cursor-pointer flipped"; 
+                card.setAttribute('data-id', index);
+                card.innerHTML = `
+                    <div class="pm-card-inner w-full h-full relative" data-item="${item}">
+                        <div class="pm-card-front w-full h-full bg-indigo-500 dark:bg-slate-800 border-2 border-indigo-400/20 dark:border-slate-700 flex items-center justify-center text-white font-extrabold text-3xl rounded-2xl shadow-sm">
+                            ?
+                        </div>
+                        <div class="pm-card-back w-full h-full bg-white dark:bg-slate-900 border-2 border-indigo-500 flex items-center justify-center text-4xl sm:text-5xl rounded-2xl shadow-sm p-2">
+                            ${item}
+                        </div>
+                    </div>
+                `;
+                card.onclick = () => pmFlipCard(card);
+                board.appendChild(card);
+            });
+
+            const movesEl = document.getElementById('pm-moves');
+            if (movesEl) movesEl.textContent = "0";
+            const matchEl = document.getElementById('pm-matches');
+            if (matchEl) matchEl.textContent = pairsCount;
+            const scoreDisp = document.getElementById('pm-score-display');
+            if (scoreDisp) scoreDisp.textContent = `Score: ${playerStats.totalScore}`;
+
+            let timeRem = pmViewLimitSecs;
+            const badge = document.getElementById('pm-timer-badge');
+            if (badge) {
+                badge.textContent = `Memorize: ${timeRem}s`;
+                badge.className = "px-3 py-1 bg-amber-500 text-white text-xs font-black rounded-full uppercase animate-pulse";
+            }
+
+            if (pmTimer) clearInterval(pmTimer);
+            pmTimer = setInterval(() => {
+                timeRem--;
+                if (badge) badge.textContent = `Memorize: ${timeRem}s`;
+                if (timeRem <= 0) {
+                    clearInterval(pmTimer);
+                    if (badge) {
+                        badge.textContent = "PLAY ACTIVE";
+                        badge.className = "px-3 py-1 bg-emerald-500 text-white text-xs font-black rounded-full uppercase";
+                    }
+                    document.querySelectorAll('.pm-card').forEach(c => {
+                        c.classList.remove('flipped');
+                    });
+                }
+            }, 1000);
+        }
+
+        function pmFlipCard(card) {
+            const badge = document.getElementById('pm-timer-badge');
+            if (badge && badge.textContent.startsWith("Memorize")) return;
+
+            if (pmFlipped.length >= 2 || card.classList.contains('flipped') || card.classList.contains('matched')) return;
+
+            card.classList.add('flipped');
+            pmFlipped.push(card);
+
+            if (pmFlipped.length === 2) {
+                pmMoves++;
+                const movesEl = document.getElementById('pm-moves');
+                if (movesEl) movesEl.textContent = pmMoves;
+                
+                const val1 = pmFlipped[0].querySelector('.pm-card-inner').getAttribute('data-item');
+                const val2 = pmFlipped[1].querySelector('.pm-card-inner').getAttribute('data-item');
+
+                if (val1 === val2) {
+                    pmFlipped[0].classList.add('matched');
+                    pmFlipped[1].classList.add('matched');
+                    pmFlipped = [];
+                    pmMatchedCount++;
+
+                    const targetCount = pmDifficulty === 'easy' ? 6 : (pmDifficulty === 'medium' ? 8 : 12);
+                    const matchEl = document.getElementById('pm-matches');
+                    if (matchEl) matchEl.textContent = targetCount - pmMatchedCount;
+
+                    if (pmMatchedCount === targetCount) {
+                        const calculatedScore = Math.max(50, 150 - pmMoves * 4);
+                        setTimeout(() => {
+                            showGameWin("Picture Match", calculatedScore, `Perfect visual attention skill! Completed difficulty ${pmDifficulty.toUpperCase()} with only ${pmMoves} moves.`);
+                        }, 500);
+                    }
+                } else {
+                    setTimeout(() => {
+                        pmFlipped[0].classList.remove('flipped');
+                        pmFlipped[1].classList.remove('flipped');
+                        pmFlipped = [];
+                    }, 1000);
+                }
+            }
+        }
+
+        function pmTriggerHint() {
+            if (pmHintsLeft <= 0) {
+                alert("No hints remaining for this round!");
+                return;
+            }
+
+            const cards = Array.from(document.querySelectorAll('.pm-card:not(.matched):not(.flipped)'));
+            if (cards.length < 2) return;
+
+            const grouped = {};
+            cards.forEach(card => {
+                const item = card.querySelector('.pm-card-inner').getAttribute('data-item');
+                if (!grouped[item]) grouped[item] = [];
+                grouped[item].push(card);
+            });
+
+            let hintPair = null;
+            for (const key in grouped) {
+                if (grouped[key].length === 2) {
+                    hintPair = grouped[key];
+                    break;
+                }
+            }
+
+            if (hintPair) {
+                pmHintsLeft--;
+                const hintCountEl = document.getElementById('pm-hint-count');
+                if (hintCountEl) hintCountEl.textContent = pmHintsLeft;
+
+                hintPair[0].classList.add('flipped');
+                hintPair[1].classList.add('flipped');
+
+                setTimeout(() => {
+                    hintPair[0].classList.remove('flipped');
+                    hintPair[1].classList.remove('flipped');
+                }, 1500);
+            }
+        }
+
+        function pmTriggerGiveUp() {
+            if (confirm("Are you sure you want to show all answers? (This round will be marked complete with 0 points)")) {
+                if (pmTimer) clearInterval(pmTimer);
+                const badge = document.getElementById('pm-timer-badge');
+                if (badge) badge.textContent = "Given Up";
+                document.querySelectorAll('.pm-card').forEach(c => {
+                    c.classList.add('flipped');
+                    c.classList.add('matched');
+                });
+                setTimeout(() => {
+                    showGameWin("Picture Match", 0, "No score was logged because the Give Up choice was activated. Retrain your focus next attempt!");
+                }, 1000);
+            }
+        }
+
+
+        // ==============================================
+        // GAME 2: WORD SEARCH IMPLEMENTATION (Upgraded word counts)
+        // ==============================================
+        let wsWordsList = {
+            easy: ["MIND", "CALM", "WISE", "EASY", "GOOD", "KEEP"], // 6 Words
+            medium: ["BRAIN", "SHARP", "FOCUS", "DAILY", "SMART", "THINK", "HAPPY", "ALERT"], // 8 Words
+            hard: ["COGNITIVE", "REASONING", "RETENTION", "MEMORIZE", "HEALTHY", "ATTENTION", "VIGILANT", "EXERCISE", "PATTERNS", "TRAINING"] // 10 Words
+        };
+        let wsDifficulty = "easy";
+        let wsGridSize = 8;
+        let wsGrid = [];
+        let wsFoundWords = new Set();
+        let wsSelectedCells = [];
+        const wsPalette = ["bg-emerald-500", "bg-purple-500", "bg-rose-500", "bg-amber-500", "bg-sky-500", "bg-teal-500"];
+
+        function setWsDifficulty(diff) {
+            wsDifficulty = diff;
+            ['easy', 'medium', 'hard'].forEach(d => {
+                const el = document.getElementById(`ws-btn-${d}`);
+                if (el) {
+                    if (d === diff) {
+                        el.className = "px-4 py-2 rounded-xl text-xs font-bold uppercase bg-indigo-500 text-white transition-all";
+                    } else {
+                        el.className = "px-4 py-2 rounded-xl text-xs font-bold uppercase bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 transition-all";
+                    }
+                }
+            });
+            initWordSearch();
+        }
+
+        function initWordSearch() {
+            wsFoundWords.clear();
+            wsSelectedCells = [];
+            const scoreDisp = document.getElementById('ws-score-display');
+            if (scoreDisp) scoreDisp.textContent = `Score: ${playerStats.totalScore}`;
+            
+            // Grid sizing adjustment for mobile and tablets
+            wsGridSize = wsDifficulty === 'easy' ? 8 : (wsDifficulty === 'medium' ? 10 : 12);
+            
+            const board = document.getElementById('ws-board');
+            if (board) {
+                board.style.gridTemplateColumns = `repeat(${wsGridSize}, minmax(0, 1fr))`;
+            }
+
+            wsGrid = Array(wsGridSize).fill(null).map(() => Array(wsGridSize).fill(''));
+
+            const currentWords = wsWordsList[wsDifficulty];
+            currentWords.forEach((word, index) => {
+                // Ensure rows are bound safely within grid size
+                let row = Math.floor((index * (wsGridSize / currentWords.length))) % wsGridSize;
+                let colStart = Math.floor(Math.random() * (wsGridSize - word.length + 1));
+                
+                let safeCounter = 0;
+                while (safeCounter < 15 && hasOverlap(row, colStart, word)) {
+                    row = (row + 1) % wsGridSize;
+                    colStart = Math.floor(Math.random() * (wsGridSize - word.length + 1));
+                    safeCounter++;
+                }
+
+                for (let i = 0; i < word.length; i++) {
+                    wsGrid[row][colStart + i] = word[i];
+                }
+            });
+
+            const abc = "ABCDEFGHJKLMNOPQRSTUVWXYZ";
+            for (let r = 0; r < wsGridSize; r++) {
+                for (let c = 0; c < wsGridSize; c++) {
+                    if (wsGrid[r][c] === '') {
+                        wsGrid[r][c] = abc[Math.floor(Math.random() * abc.length)];
+                    }
+                }
+            }
+
+            renderWordSearchBoard();
+        }
+
+        function hasOverlap(row, colStart, word) {
+            for (let i = 0; i < word.length; i++) {
+                if (wsGrid[row][colStart + i] !== '' && wsGrid[row][colStart + i] !== word[i]) {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        function renderWordSearchBoard() {
+            const board = document.getElementById('ws-board');
+            if (!board) return;
+            board.innerHTML = "";
+
+            const listDiv = document.getElementById('ws-wordlist');
+            const currentWords = wsWordsList[wsDifficulty];
+            if (listDiv) {
+                listDiv.innerHTML = currentWords.map((w, index) => {
+                    const found = wsFoundWords.has(w);
+                    const colorClass = wsPalette[index % wsPalette.length];
+                    return `
+                        <span class="px-3 py-1 rounded-full font-bold text-xs tracking-wide shadow-sm uppercase ${found ? `${colorClass} text-white line-through opacity-60` : 'bg-indigo-50 dark:bg-slate-800 text-indigo-600 dark:text-indigo-400'}">
+                            ${w}
+                        </span>
+                    `;
+                }).join('');
+            }
+
+            // Render smaller keys for 12x12 so it remains fully inside mobile view limits
+            const cellClass = wsGridSize > 10 ? "w-6 h-6 sm:w-8 sm:h-8 text-xs" : "w-8 h-8 sm:w-10 sm:h-10 text-sm sm:text-base";
+
+            for (let r = 0; r < wsGridSize; r++) {
+                for (let c = 0; c < wsGridSize; c++) {
+                    const char = wsGrid[r][c];
+                    const cell = document.createElement('button');
+                    cell.className = `${cellClass} rounded-lg font-black flex items-center justify-center transition-all bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700/80 active:scale-95 text-slate-800 dark:text-slate-100`;
+                    cell.textContent = char;
+                    cell.setAttribute('data-row', r);
+                    cell.setAttribute('data-col', c);
+                    cell.onclick = () => wsOnCellClick(r, c, cell);
+                    board.appendChild(cell);
+                }
+            }
+        }
+
+        function wsOnCellClick(row, col, cellElement) {
+            const alreadySelectedIdx = wsSelectedCells.findIndex(cell => cell.r === row && cell.c === col);
+
+            if (alreadySelectedIdx !== -1) {
+                const cellClass = wsGridSize > 10 ? "w-6 h-6 sm:w-8 sm:h-8 text-xs" : "w-8 h-8 sm:w-10 sm:h-10 text-sm sm:text-base";
+                cellElement.className = `${cellClass} rounded-lg font-black flex items-center justify-center transition-all bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700/80 text-slate-800 dark:text-slate-100`;
+                wsSelectedCells.splice(alreadySelectedIdx, 1);
+                return;
+            }
+
+            wsSelectedCells.push({ r: row, c: col, char: wsGrid[row][col], element: cellElement });
+            cellElement.className = "w-8 h-8 sm:w-10 sm:h-10 rounded-xl font-black text-base sm:text-lg flex items-center justify-center transition-all bg-amber-500 text-white border-2 border-amber-400";
+
+            if (wsSelectedCells.length === 2) {
+                const [start, end] = wsSelectedCells;
+                
+                let constructed = "";
+                if (start.r === end.r) {
+                    const r = start.r;
+                    const cStart = Math.min(start.c, end.c);
+                    const cEnd = Math.max(start.c, end.c);
+                    for (let c = cStart; c <= cEnd; c++) {
+                        constructed += wsGrid[r][c];
+                    }
+                }
+
+                const reversed = constructed.split('').reverse().join('');
+                const currentWords = wsWordsList[wsDifficulty];
+                let matchingWord = currentWords.find(w => w === constructed || w === reversed);
+
+                if (matchingWord && !wsFoundWords.has(matchingWord)) {
+                    wsFoundWords.add(matchingWord);
+                    
+                    const r = start.r;
+                    const cStart = Math.min(start.c, end.c);
+                    const cEnd = Math.max(start.c, end.c);
+                    const wordIdx = currentWords.indexOf(matchingWord);
+                    const successColor = wsPalette[wordIdx % wsPalette.length];
+
+                    for (let c = cStart; c <= cEnd; c++) {
+                        const targetCell = document.querySelector(`[data-row="${r}"][data-col="${c}"]`);
+                        if (targetCell) {
+                            targetCell.className = `w-6 h-6 sm:w-10 sm:h-10 rounded-xl font-black text-xs sm:text-lg flex items-center justify-center text-white border-2 border-white/20 ${successColor}`;
+                            targetCell.disabled = true;
+                        }
+                    }
+
+                    wsSelectedCells = [];
+                    renderWordSearchBoard();
+
+                    if (wsFoundWords.size === currentWords.length) {
+                        setTimeout(() => {
+                            showGameWin("Word Search", 150, `Vibrant pattern recognition! You located all target terms in the ${wsDifficulty.toUpperCase()} exercise.`);
+                        }, 500);
+                    }
+                } else {
+                    setTimeout(() => {
+                        wsSelectedCells.forEach(cell => {
+                            const cellClass = wsGridSize > 10 ? "w-6 h-6 sm:w-8 sm:h-8 text-xs" : "w-8 h-8 sm:w-10 sm:h-10 text-sm sm:text-base";
+                            cell.element.className = `${cellClass} rounded-lg font-black flex items-center justify-center transition-all bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700/80 text-slate-800 dark:text-slate-100`;
+                        });
+                        wsSelectedCells = [];
+                    }, 500);
+                }
+            }
+        }
+
+        function wsTriggerHint() {
+            const currentWords = wsWordsList[wsDifficulty];
+            const missing = currentWords.find(w => !wsFoundWords.has(w));
+            if (!missing) return;
+
+            for (let r = 0; r < wsGridSize; r++) {
+                for (let c = 0; c <= wsGridSize - missing.length; c++) {
+                    let text = "";
+                    for (let offset = 0; offset < missing.length; offset++) {
+                        text += wsGrid[r][c + offset];
+                    }
+                    if (text === missing || text.split('').reverse().join('') === missing) {
+                        const targetCell = document.querySelector(`[data-row="${r}"][data-col="${c}"]`);
+                        if (targetCell) {
+                            targetCell.classList.add('bg-amber-400', 'text-white', 'animate-pulse');
+                            setTimeout(() => {
+                                targetCell.classList.remove('bg-amber-400', 'text-white', 'animate-pulse');
+                            }, 2000);
+                        }
+                        return;
+                    }
+                }
+            }
+        }
+
+        function wsTriggerGiveUp() {
+            if (confirm("Show solutions to this word puzzle?")) {
+                const currentWords = wsWordsList[wsDifficulty];
+                currentWords.forEach((word, wordIdx) => {
+                    wsFoundWords.add(word);
+                    for (let r = 0; r < wsGridSize; r++) {
+                        for (let c = 0; c <= wsGridSize - word.length; c++) {
+                            let text = "";
+                            for (let offset = 0; offset < word.length; offset++) {
+                                text += wsGrid[r][c + offset];
+                            }
+                            if (text === word || text.split('').reverse().join('') === word) {
+                                const successColor = wsPalette[wordIdx % wsPalette.length];
+                                for (let offset = 0; offset < word.length; offset++) {
+                                    const cell = document.querySelector(`[data-row="${r}"][data-col="${c + offset}"]`);
+                                    if (cell) {
+                                        cell.className = `w-6 h-6 sm:w-10 sm:h-10 rounded-xl font-black text-xs sm:text-lg flex items-center justify-center text-white border-2 border-white/20 ${successColor}`;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+
+                renderWordSearchBoard();
+                setTimeout(() => {
+                    showGameWin("Word Search", 0, "No score gained. The Give Up button revealed the puzzle solution.");
+                }, 1000);
+            }
+        }
+
+
+        // ==============================================
+        // GAME 3: WORD RECALL IMPLEMENTATION (6-Word Hard Match)
+        // ==============================================
+        const wrCategories = {
+            "Household Objects": ["CHAIR", "CLOCK", "TABLE", "LAMP", "DOOR", "PHONE", "MIRROR", "GLASS", "RUG", "SPOON", "PLATE", "SOFA"],
+            "Nature & Outdoors": ["RIVER", "STONE", "CLOUD", "GRASS", "FLOWER", "TREES", "MOUNTAIN", "BUSH", "BIRD", "LEAF", "FOREST", "SAND"]
+        };
+        let wrActiveTheme = "";
+        let wrLevel = "easy";
+        let wrMemorizeTimerSeconds = 8;
+        let wrRoundCounter = 1; 
+        let wrAccumulatedScore = 0;
+
+        let wrTargetWords = [];
+        let wrSelectedChoices = [];
+        let wrTimerValue = 8;
+        let wrTimerInterval = null;
+
+        function setWrLevel(level) {
+            wrLevel = level;
+            ['easy', 'medium', 'hard'].forEach(l => {
+                const btn = document.getElementById(`wr-lvl-${l}`);
+                if (btn) {
+                    if (l === level) {
+                        btn.className = "px-3 py-2 rounded-xl text-xs font-bold uppercase transition-all bg-indigo-500 text-white";
+                    } else {
+                        btn.className = "px-3 py-2 rounded-xl text-xs font-bold uppercase transition-all bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300";
+                    }
+                }
+            });
+        }
+
+        function setWrTimer(seconds) {
+            wrMemorizeTimerSeconds = seconds;
+            [5, 8, 10].forEach(s => {
+                const btn = document.getElementById(`wr-time-${s}`);
+                if (btn) {
+                    if (s === seconds) {
+                        btn.className = "px-3 py-2 rounded-xl text-xs font-bold uppercase transition-all bg-indigo-500 text-white";
+                    } else {
+                        btn.className = "px-3 py-2 rounded-xl text-xs font-bold uppercase transition-all bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300";
+                    }
+                }
+            });
+        }
+
+        function startWrGameSession() {
+            wrRoundCounter = 1;
+            wrAccumulatedScore = 0;
+            const configPanel = document.getElementById('wr-config-panel');
+            if (configPanel) configPanel.classList.add('hidden');
+            const memorizePanel = document.getElementById('wr-phase-memorize');
+            if (memorizePanel) memorizePanel.classList.remove('hidden');
+            initWordRecall();
+        }
+
+        function initWordRecall() {
+            const tracker = document.getElementById('wr-set-tracker');
+            if (tracker) tracker.textContent = `Set ${wrRoundCounter} of 3`;
+            const themes = Object.keys(wrCategories);
+            wrActiveTheme = themes[Math.floor(Math.random() * themes.length)];
+            const allWords = wrCategories[wrActiveTheme];
+            
+            // Easy is 4 words, Medium is 5 words, Hard is 6 words
+            const targetSize = wrLevel === 'easy' ? 4 : (wrLevel === 'medium' ? 5 : 6);
+            const shuffled = [...allWords].sort(() => Math.random() - 0.5);
+            wrTargetWords = shuffled.slice(0, targetSize);
+            wrSelectedChoices = [];
+
+            const memPanel = document.getElementById('wr-phase-memorize');
+            if (memPanel) memPanel.classList.remove('hidden');
+            const recPanel = document.getElementById('wr-phase-recall');
+            if (recPanel) recPanel.classList.add('hidden');
+            const scoreDisp = document.getElementById('wr-score-display');
+            if (scoreDisp) scoreDisp.textContent = `Score: ${playerStats.totalScore}`;
+
+            const wordBox = document.getElementById('wr-words-to-memorize');
+            if (wordBox) {
+                wordBox.innerHTML = wrTargetWords.map(w => `
+                    <div class="p-4 bg-indigo-500 text-white text-xl font-extrabold rounded-2xl shadow-md uppercase tracking-wider">
+                        ${w}
+                    </div>
+                `).join('');
+            }
+
+            wrTimerValue = wrMemorizeTimerSeconds;
+            const timerEl = document.getElementById('wr-timer');
+            if (timerEl) timerEl.textContent = wrTimerValue;
+            if (wrTimerInterval) clearInterval(wrTimerInterval);
+
+            wrTimerInterval = setInterval(() => {
+                wrTimerValue--;
+                if (timerEl) timerEl.textContent = wrTimerValue;
+                if (wrTimerValue <= 0) {
+                    clearInterval(wrTimerInterval);
+                    startWordRecallPhase2(allWords);
+                }
+            }, 1000);
+        }
+
+        function startWordRecallPhase2(allWords) {
+            const memPanel = document.getElementById('wr-phase-memorize');
+            if (memPanel) memPanel.classList.add('hidden');
+            const recPanel = document.getElementById('wr-phase-recall');
+            if (recPanel) recPanel.classList.remove('hidden');
+
+            const decoysCount = wrLevel === 'easy' ? 5 : (wrLevel === 'medium' ? 7 : 10);
+            const decoys = allWords.filter(w => !wrTargetWords.includes(w)).slice(0, decoysCount);
+            const displayPool = [...wrTargetWords, ...decoys].sort(() => Math.random() - 0.5);
+
+            const matrix = document.getElementById('wr-words-matrix');
+            if (matrix) {
+                matrix.innerHTML = "";
+
+                displayPool.forEach(word => {
+                    const btn = document.createElement('button');
+                    btn.className = "p-3 bg-slate-50 dark:bg-slate-900 hover:bg-slate-100 dark:hover:bg-slate-800 border-2 border-slate-200 dark:border-slate-800 rounded-2xl text-sm font-extrabold uppercase transition-all text-slate-700 dark:text-slate-300 active:scale-95";
+                    btn.textContent = word;
+                    btn.onclick = () => wrToggleChoice(word, btn);
+                    matrix.appendChild(btn);
+                });
+            }
+        }
+
+        function wrToggleChoice(word, element) {
+            const idx = wrSelectedChoices.indexOf(word);
+            const limit = wrTargetWords.length;
+
+            if (idx > -1) {
+                wrSelectedChoices.splice(idx, 1);
+                element.className = "p-3 bg-slate-50 dark:bg-slate-900 hover:bg-slate-100 dark:hover:bg-slate-800 border-2 border-slate-200 dark:border-slate-800 rounded-2xl text-sm font-extrabold uppercase transition-all text-slate-700 dark:text-slate-300 active:scale-95";
+            } else {
+                if (wrSelectedChoices.length >= limit) return;
+                wrSelectedChoices.push(word);
+                element.className = "p-3 bg-indigo-500 text-white border-2 border-indigo-400 rounded-2xl text-sm font-extrabold uppercase transition-all active:scale-95 shadow-md shadow-indigo-500/10";
+            }
+        }
+
+        function submitWordRecallSet() {
+            const targetSize = wrTargetWords.length;
+            if (wrSelectedChoices.length < targetSize) {
+                alert(`Please select exactly ${targetSize} words that you memorized.`);
+                return;
+            }
+
+            let correct = 0;
+            wrSelectedChoices.forEach(w => {
+                if (wrTargetWords.includes(w)) correct++;
+            });
+
+            const pointsGained = correct * 25;
+            wrAccumulatedScore += pointsGained;
+
+            if (wrRoundCounter < 3) {
+                alert(`Set ${wrRoundCounter} Complete! Correct answers: ${correct}/${targetSize}. Preparing the next set.`);
+                wrRoundCounter++;
+                const recPanel = document.getElementById('wr-phase-recall');
+                if (recPanel) recPanel.classList.add('hidden');
+                initWordRecall();
+            } else {
+                showGameWin("Word Recall", wrAccumulatedScore, `Memory workout finished! Recalled accurately throughout 3 consecutive sets.`);
+                const cfgPanel = document.getElementById('wr-config-panel');
+                if (cfgPanel) cfgPanel.classList.remove('hidden');
+                const memPanel = document.getElementById('wr-phase-memorize');
+                if (memPanel) memPanel.classList.add('hidden');
+                const recPanel = document.getElementById('wr-phase-recall');
+                if (recPanel) recPanel.classList.add('hidden');
+            }
+        }
+
+        function wrTriggerHint() {
+            const matrix = document.getElementById('wr-words-matrix');
+            if (!matrix) return;
+            const matrixButtons = Array.from(matrix.querySelectorAll('button'));
+            matrixButtons.forEach(btn => {
+                const word = btn.textContent;
+                if (wrTargetWords.includes(word)) {
+                    btn.classList.add('border-yellow-400', 'bg-yellow-100', 'dark:bg-yellow-900/40');
+                }
+            });
+            setTimeout(() => {
+                matrixButtons.forEach(btn => {
+                    const word = btn.textContent;
+                    if (wrTargetWords.includes(word)) {
+                        btn.classList.remove('border-yellow-400', 'bg-yellow-100', 'dark:bg-yellow-900/40');
+                    }
+                });
+            }, 1500);
+        }
+
+        function wrTriggerGiveUp() {
+            if (confirm("Reveal the correct target words? (Accumulated score for this set will be 0)")) {
+                const matrix = document.getElementById('wr-words-matrix');
+                if (!matrix) return;
+                const matrixButtons = Array.from(matrix.querySelectorAll('button'));
+                wrSelectedChoices = [];
+                matrixButtons.forEach(btn => {
+                    const word = btn.textContent;
+                    if (wrTargetWords.includes(word)) {
+                        btn.className = "p-3 bg-indigo-500 text-white border-2 border-indigo-400 rounded-2xl text-sm font-extrabold uppercase transition-all shadow-md";
+                        wrSelectedChoices.push(word);
+                    } else {
+                        btn.className = "p-3 bg-slate-50 dark:bg-slate-900 opacity-30 border border-slate-200 rounded-2xl text-sm font-extrabold uppercase text-slate-700";
+                    }
+                });
+            }
+        }
+
+
+        // ==============================================
+        // GAME 4: DIGIT DASH IMPLEMENTATION (Line-Fit fix)
+        // ==============================================
+        let ddDigitLength = 8;
+        let ddViewLimitSecs = 10;
+        let ddRoundCounter = 1; 
+        let ddAccumulatedScore = 0;
+
+        let ddCurrentDigits = "";
+        let ddTypedValue = "";
+        let ddIsRunning = false;
+        let ddTimerInterval = null;
+
+        function setDdDigitLength(length) {
+            ddDigitLength = length;
+            [7, 8, 9, 10].forEach(l => {
+                const btn = document.getElementById(`dd-len-${l}`);
+                if (btn) {
+                    if (l === length) {
+                        btn.className = "px-3 py-2 bg-indigo-500 text-white rounded-xl text-xs font-bold";
+                    } else {
+                        btn.className = "px-3 py-2 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 rounded-xl text-xs font-bold";
+                    }
+                }
+            });
+        }
+
+        function setDdViewTime(seconds) {
+            ddViewLimitSecs = seconds;
+            [10, 15, 20].forEach(s => {
+                const btn = document.getElementById(`dd-time-${s}`);
+                if (btn) {
+                    if (s === seconds) {
+                        btn.className = "px-3 py-2 bg-indigo-500 text-white rounded-xl text-xs font-bold";
+                    } else {
+                        btn.className = "px-3 py-2 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 rounded-xl text-xs font-bold";
+                    }
+                }
+            });
+        }
+
+        function startDdChallengeSeries() {
+            ddRoundCounter = 1;
+            ddAccumulatedScore = 0;
+            const setupEl = document.getElementById('dd-setup-panel');
+            if (setupEl) setupEl.classList.add('hidden');
+            startDigitDashRound();
+        }
+
+        function startDigitDashRound() {
+            ddTypedValue = "";
+            const inputField = document.getElementById('dd-typed-input');
+            if (inputField) inputField.value = "";
+            const tracker = document.getElementById('dd-set-tracker');
+            if (tracker) tracker.textContent = `Set ${ddRoundCounter} of 6`;
+            const memPanel = document.getElementById('dd-memorize-panel');
+            if (memPanel) memPanel.classList.remove('hidden');
+            const inputPanel = document.getElementById('dd-input-panel');
+            if (inputPanel) inputPanel.classList.add('hidden');
+
+            ddCurrentDigits = "";
+            for (let i = 0; i < ddDigitLength; i++) {
+                ddCurrentDigits += Math.floor(Math.random() * 10);
+            }
+
+            const digitContainer = document.getElementById('dd-display-digits');
+            if (digitContainer) {
+                digitContainer.textContent = ddCurrentDigits;
+
+                // SENIOR COGNITIVE ADJUSTMENT: Exact line height and font size fitting inside the circle 1-line
+                const length = ddCurrentDigits.length;
+                if (length >= 10) {
+                    digitContainer.style.fontSize = "1.5rem"; // guaranteed to not overflow
+                    digitContainer.style.letterSpacing = "0.02em";
+                } else if (length === 9) {
+                    digitContainer.style.fontSize = "1.75rem";
+                    digitContainer.style.letterSpacing = "0.04em";
+                } else if (length === 8) {
+                    digitContainer.style.fontSize = "2.0rem";
+                    digitContainer.style.letterSpacing = "0.06em";
+                } else {
+                    digitContainer.style.fontSize = "2.25rem";
+                    digitContainer.style.letterSpacing = "0.08em";
+                }
+            }
+
+            const ringProgress = document.getElementById('dd-ring-progress');
+            if (ringProgress) ringProgress.style.strokeDashoffset = "0";
+
+            let timeRemaining = ddViewLimitSecs;
+            const secDisp = document.getElementById('dd-circle-sec-display');
+            if (secDisp) secDisp.textContent = timeRemaining;
+
+            if (ddTimerInterval) clearInterval(ddTimerInterval);
+            ddTimerInterval = setInterval(() => {
+                timeRemaining--;
+                if (secDisp) secDisp.textContent = timeRemaining;
+
+                if (ringProgress) {
+                    const fraction = timeRemaining / ddViewLimitSecs;
+                    const offset = 283 - (fraction * 283);
+                    ringProgress.style.strokeDashoffset = offset;
+                }
+
+                if (timeRemaining <= 0) {
+                    clearInterval(ddTimerInterval);
+                    if (memPanel) memPanel.classList.add('hidden');
+                    if (inputPanel) inputPanel.classList.remove('hidden');
+                }
+            }, 1000);
+        }
+
+        function ddKeypress(key) {
+            const inputField = document.getElementById('dd-typed-input');
+            if (key === 'C') {
+                ddTypedValue = ddTypedValue.slice(0, -1);
+            } else {
+                if (ddTypedValue.length >= ddCurrentDigits.length) return;
+                ddTypedValue += key;
+            }
+            if (inputField) inputField.value = ddTypedValue;
+        }
+
+        function ddSubmit() {
+            if (ddTypedValue === ddCurrentDigits) {
+                ddAccumulatedScore += 30; 
+                alert(`Set ${ddRoundCounter} Correct! (+30 pts added)`);
+            } else {
+                alert(`Set ${ddRoundCounter} Incorrect! The correct number was ${ddCurrentDigits}`);
+            }
+
+            if (ddRoundCounter < 6) {
+                ddRoundCounter++;
+                startDigitDashRound();
+            } else {
+                showGameWin("Digit Dash", ddAccumulatedScore, `Completed 6 sets of working memory drills! Digit length level: ${ddDigitLength}.`);
+                initDigitDashSetup();
+            }
+        }
+
+        function initDigitDashSetup() {
+            const setupEl = document.getElementById('dd-setup-panel');
+            if (setupEl) setupEl.classList.remove('hidden');
+            const memPanel = document.getElementById('dd-memorize-panel');
+            if (memPanel) memPanel.classList.add('hidden');
+            const inputPanel = document.getElementById('dd-input-panel');
+            if (inputPanel) inputPanel.classList.add('hidden');
+            const scoreDisp = document.getElementById('dd-score-display');
+            if (scoreDisp) scoreDisp.textContent = `Score: ${playerStats.totalScore}`;
+        }
+
+
+        // ==============================================
+        // GAME 5: ELDERLY SUDOKU IMPLEMENTATION
+        // ==============================================
+        let sudokuSolution = [
+            [1, 2, 3, 4, 5, 6],
+            [4, 5, 6, 1, 2, 3],
+            [2, 3, 4, 5, 6, 1],
+            [5, 6, 1, 2, 3, 4],
+            [3, 4, 5, 6, 1, 2],
+            [6, 1, 2, 3, 4, 5]
+        ];
+        let sudokuFullSolvedGrid = []; 
+        let sudokuBoardState = [];
+        let sudokuOriginals = [];
+        let sudokuSelectedCell = null;
+        let sudokuTimerInterval = null;
+        let sudokuSeconds = 0;
+
+        function initSudokuGame() {
+            sudokuSeconds = 0;
+            const scoreDisp = document.getElementById('sudoku-score-display');
+            if (scoreDisp) scoreDisp.textContent = `Score: ${playerStats.totalScore}`;
+            
+            const shift = Math.floor(Math.random() * 5) + 1;
+            sudokuFullSolvedGrid = sudokuSolution.map(row => 
+                row.map(val => {
+                    let newVal = val + shift;
+                    return newVal > 6 ? newVal - 6 : newVal;
+                })
+            );
+
+            sudokuBoardState = sudokuFullSolvedGrid.map(row => [...row]);
+
+            sudokuOriginals = Array(6).fill(null).map(() => Array(6).fill(true));
+            for (let r = 0; r < 6; r++) {
+                let missing1 = Math.floor(Math.random() * 3);
+                let missing2 = Math.floor(Math.random() * 3) + 3;
+                sudokuBoardState[r][missing1] = 0;
+                sudokuBoardState[r][missing2] = 0;
+                sudokuOriginals[r][missing1] = false;
+                sudokuOriginals[r][missing2] = false;
+            }
+
+            renderSudokuBoard();
+
+            if (sudokuTimerInterval) clearInterval(sudokuTimerInterval);
+            const timerDisp = document.getElementById('sudoku-timer-display');
+            sudokuTimerInterval = setInterval(() => {
+                sudokuSeconds++;
+                const mins = String(Math.floor(sudokuSeconds / 60)).padStart(2, '0');
+                const secs = String(sudokuSeconds % 60).padStart(2, '0');
+                if (timerDisp) timerDisp.textContent = `Time: ${mins}:${secs}`;
+            }, 1000);
+        }
+
+        function renderSudokuBoard() {
+            const container = document.getElementById('sudoku-board');
+            if (!container) return;
+            container.innerHTML = "";
+
+            for (let r = 0; r < 6; r++) {
+                for (let c = 0; c < 6; c++) {
+                    const value = sudokuBoardState[r][c];
+                    const isOriginal = sudokuOriginals[r][c];
+                    const cell = document.createElement('button');
+                    
+                    let borderClasses = "border border-slate-300 dark:border-slate-800";
+                    if (r === 1 || r === 3) borderClasses += " border-b-4 border-b-slate-400 dark:border-b-slate-700";
+                    if (c === 2) borderClasses += " border-r-4 border-r-slate-400 dark:border-r-slate-700";
+
+                    let textClass = value === 0 ? "text-transparent" : (isOriginal ? "text-indigo-900 dark:text-indigo-200 font-extrabold" : "text-emerald-500 font-black");
+                    let bgClass = isOriginal ? "bg-slate-200 dark:bg-slate-800" : "bg-white dark:bg-slate-900";
+
+                    cell.className = `aspect-ratio: 1/1 w-full h-11 sm:h-14 flex items-center justify-center text-xl rounded-xl transition-all ${borderClasses} ${textClass} ${bgClass} active:scale-95`;
+                    cell.textContent = value || "";
+                    
+                    if (!isOriginal) {
+                        cell.onclick = () => sudokuSelectCell(r, c, cell);
+                    }
+                    container.appendChild(cell);
+                }
+            }
+        }
+
+        function sudokuSelectCell(row, col, element) {
+            if (sudokuSelectedCell) {
+                renderSudokuBoard();
+            }
+            sudokuSelectedCell = { r: row, c: col };
+            element.classList.add('border-4', 'border-amber-500');
+        }
+
+        function sudokuNumberSelect(num) {
+            if (!sudokuSelectedCell) {
+                alert("Please select an editable cell on the board first!");
+                return;
+            }
+            const { r, c } = sudokuSelectedCell;
+            sudokuBoardState[r][c] = num;
+            sudokuSelectedCell = null;
+            renderSudokuBoard();
+
+            let solved = true;
+            for (let row = 0; row < 6; row++) {
+                for (let col = 0; col < 6; col++) {
+                    if (sudokuBoardState[row][col] === 0) {
+                        solved = false;
+                        break;
+                    }
+                }
+            }
+
+            if (solved) {
+                if (validateSudokuSolutions()) {
+                    clearInterval(sudokuTimerInterval);
+                    const bonus = Math.max(50, 200 - sudokuSeconds);
+                    showGameWin("Elderly Sudoku", bonus, "Masterful! Logic and spatial configurations are fully verified.");
+                } else {
+                    alert("The board is full, but some numbers are misplaced. Double check your rows and columns!");
+                }
+            }
+        }
+
+        function sudokuClearCell() {
+            if (!sudokuSelectedCell) return;
+            const { r, c } = sudokuSelectedCell;
+            sudokuBoardState[r][c] = 0;
+            sudokuSelectedCell = null;
+            renderSudokuBoard();
+        }
+
+        function validateSudokuSolutions() {
+            for (let i = 0; i < 6; i++) {
+                let rowSet = new Set();
+                let colSet = new Set();
+                for (let j = 0; j < 6; j++) {
+                    rowSet.add(sudokuBoardState[i][j]);
+                    colSet.add(sudokuBoardState[j][i]);
+                }
+                if (rowSet.size !== 6 || colSet.size !== 6) return false;
+            }
+            return true;
+        }
+
+        function sudokuTriggerHint() {
+            let emptyCells = [];
+            for (let r = 0; r < 6; r++) {
+                for (let c = 0; c < 6; c++) {
+                    if (sudokuBoardState[r][c] === 0) {
+                        emptyCells.push({ r, c });
+                    }
+                }
+            }
+
+            if (emptyCells.length > 0) {
+                const pick = emptyCells[Math.floor(Math.random() * emptyCells.length)];
+                sudokuBoardState[pick.r][pick.c] = sudokuFullSolvedGrid[pick.r][pick.c];
+                renderSudokuBoard();
+
+                let solved = true;
+                for (let row = 0; row < 6; row++) {
+                    for (let col = 0; col < 6; col++) {
+                        if (sudokuBoardState[row][col] === 0) {
+                            solved = false;
+                            break;
+                        }
+                    }
+                }
+                if (solved && validateSudokuSolutions()) {
+                    clearInterval(sudokuTimerInterval);
+                    showGameWin("Elderly Sudoku", 40, "Finished Sudoku with assistive hints. Great effort!");
+                }
+            }
+        }
+
+        function sudokuTriggerGiveUp() {
+            if (confirm("Solve this Sudoku board instantly?")) {
+                clearInterval(sudokuTimerInterval);
+                sudokuBoardState = sudokuFullSolvedGrid.map(row => [...row]);
+                renderSudokuBoard();
+                setTimeout(() => {
+                    showGameWin("Elderly Sudoku", 0, "No score gained because Give Up was requested. Challenge yourself next time!");
+                }, 1000);
+            }
+        }
+
+        // Global State Launch Handshake
+        function launchGame(gameId) {
+            showScreen(gameId);
+            if (gameId === 'learn_malay') {
+                setMalayLevel('easy');
+            } else if (gameId === 'picture_match') {
+                setPmDifficulty('easy');
+                setPmViewTime(5);
+                initPictureMatch();
+            } else if (gameId === 'word_search') {
+                setWsDifficulty('easy');
+            } else if (gameId === 'word_recall') {
+                const cfgPanel = document.getElementById('wr-config-panel');
+                if (cfgPanel) cfgPanel.classList.remove('hidden');
+                const memPanel = document.getElementById('wr-phase-memorize');
+                if (memPanel) memPanel.classList.add('hidden');
+                const recPanel = document.getElementById('wr-phase-recall');
+                if (recPanel) recPanel.classList.add('hidden');
+                setWrLevel('easy');
+                setWrTimer(8);
+            } else if (gameId === 'digit_dash') {
+                setDdDigitLength(8);
+                setDdViewTime(10);
+                initDigitDashSetup();
+            } else if (gameId === 'sudoku') {
+                initSudokuGame();
+            }
+        }
+    </script>
+</body>
+</html>
