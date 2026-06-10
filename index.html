@@ -86,6 +86,16 @@
         .circle-timer-svg {
             transform: rotate(-90deg);
         }
+
+        /* Extra clickability touch enhancements for Word Search */
+        .ws-cell-active {
+            animation: ws-bounce 0.15s ease-out;
+        }
+        @keyframes ws-bounce {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.18); }
+            100% { transform: scale(1.1); }
+        }
     </style>
 </head>
 <body class="bg-slate-50 text-slate-900 dark:bg-[#090d16] dark:text-slate-100 min-h-screen flex flex-col justify-start items-stretch p-0 m-0">
@@ -98,7 +108,7 @@
             </div>
             <div>
                 <h1 class="text-xl font-extrabold tracking-tight bg-gradient-to-r from-indigo-500 to-indigo-600 dark:from-indigo-400 dark:to-emerald-400 bg-clip-text text-transparent">MindGym Pro</h1>
-                <span id="player-badge" class="text-[11px] font-medium text-slate-400 dark:text-slate-500 uppercase">Interactive Cognitive Hub</span>
+                <span id="player-badge" class="text-[11px] font-medium text-slate-400 dark:text-slate-500 uppercase">Interactive Hub</span>
             </div>
         </div>
         
@@ -108,7 +118,7 @@
                 <i id="theme-icon" data-lucide="sun" class="w-5 h-5"></i>
             </button>
             
-            <!-- Phone/Account Settings Button (Hidden initially) -->
+            <!-- Phone/Account Settings Button -->
             <button id="profile-btn" onclick="openProfileModal()" class="hidden p-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 transition-all">
                 <i data-lucide="user" class="w-5 h-5"></i>
             </button>
@@ -162,7 +172,7 @@
                 <div class="absolute -right-10 -bottom-10 w-44 h-44 bg-white/10 rounded-full blur-2xl"></div>
                 <div>
                     <span class="bg-white/20 text-white text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider">Daily Training</span>
-                    <h2 class="text-xl sm:text-2xl font-black mt-3 leading-tight text-white">
+                    <h2 class="text-xl sm:text-2xl font-black mt-3 leading-tight text-white font-sans">
                         Welcome to another day of brain training, <span id="dash-user-label" class="text-emerald-300">Player</span>!
                     </h2>
                 </div>
@@ -171,11 +181,11 @@
                 <div class="bg-black/20 rounded-2xl p-4 flex flex-col md:flex-row justify-between items-start md:items-center gap-2">
                     <div class="flex flex-col text-left">
                         <span id="calendar-gregorian" class="text-sm font-extrabold tracking-wide">Sunday, 7 June 2026</span>
-                        <span id="calendar-lunar" class="text-xs text-indigo-200 font-bold mt-0.5">丙午马年四月廿二 (Lunar Calendar)</span>
+                        <span id="calendar-lunar" class="text-xs text-indigo-200 font-bold mt-0.5 font-sans">丙午马年四月廿二 (Lunar Calendar)</span>
                     </div>
                     <div class="text-right flex items-center gap-2 shrink-0 self-stretch md:self-auto border-t border-white/10 md:border-t-0 pt-2 md:pt-0">
                         <i data-lucide="clock" class="w-4 h-4 text-emerald-300"></i>
-                        <span id="dashboard-clock" class="text-base font-black tracking-widest text-emerald-300">15:33:00</span>
+                        <span id="dashboard-clock" class="text-base font-black tracking-widest text-emerald-300 font-mono">15:33:00</span>
                     </div>
                 </div>
 
@@ -199,7 +209,7 @@
                     </div>
                     <div class="space-y-1 flex-grow">
                         <div class="flex items-center justify-between">
-                            <h3 class="text-base font-extrabold text-indigo-500 uppercase tracking-wider">AI Cognitive Tip</h3>
+                            <h3 class="text-xs font-extrabold text-indigo-500 uppercase tracking-wider">AI Cognitive Tip</h3>
                             <button onclick="refreshAITip()" class="text-xs flex items-center gap-1 text-slate-400 hover:text-indigo-500">
                                 <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i> Refresh
                             </button>
@@ -212,10 +222,10 @@
                 </div>
             </div>
 
-            <!-- COMPACT 3X3 GRID FOR MOBILE & ELDERLY USABILITY (No Headers) -->
+            <!-- COMPACT 3X3 GRID FOR MOBILE & ELDERLY USABILITY (No Header Titles) -->
             <div class="grid grid-cols-3 gap-3">
                 
-                <!-- 1. Learn Malay Joy (Icon: languages, Amber Theme) -->
+                <!-- 1. Learn Malay Joy -->
                 <div onclick="launchGame('learn_malay')" class="game-card-transition bg-gradient-to-b from-amber-500/10 to-amber-500/5 dark:from-amber-950/30 dark:to-amber-950/15 border-2 border-amber-500/20 hover:border-amber-500 rounded-2xl p-3 flex flex-col items-center justify-center text-center cursor-pointer shadow-sm">
                     <div class="w-11 h-11 sm:w-12 sm:h-12 rounded-xl bg-amber-500 text-white flex items-center justify-center shadow-md shadow-amber-500/20 mb-2">
                         <i data-lucide="languages" class="w-7 h-7"></i>
@@ -223,7 +233,7 @@
                     <span class="text-xs sm:text-sm font-black leading-tight text-slate-800 dark:text-slate-200">Learn Malay</span>
                 </div>
 
-                <!-- 2. Picture Match (Icon: shapes, Emerald Theme) -->
+                <!-- 2. Picture Match -->
                 <div onclick="launchGame('picture_match')" class="game-card-transition bg-gradient-to-b from-emerald-500/10 to-emerald-500/5 dark:from-emerald-950/30 dark:to-emerald-950/15 border-2 border-emerald-500/20 hover:border-emerald-500 rounded-2xl p-3 flex flex-col items-center justify-center text-center cursor-pointer shadow-sm">
                     <div class="w-11 h-11 sm:w-12 sm:h-12 rounded-xl bg-emerald-500 text-white flex items-center justify-center shadow-md shadow-emerald-500/20 mb-2">
                         <i data-lucide="shapes" class="w-7 h-7"></i>
@@ -231,7 +241,7 @@
                     <span class="text-xs sm:text-sm font-black leading-tight text-slate-800 dark:text-slate-200">Picture Match</span>
                 </div>
 
-                <!-- 3. Word Search (Icon: search, Teal Theme) -->
+                <!-- 3. Word Search -->
                 <div onclick="launchGame('word_search')" class="game-card-transition bg-gradient-to-b from-teal-500/10 to-teal-500/5 dark:from-teal-950/30 dark:to-teal-950/15 border-2 border-teal-500/20 hover:border-teal-500 rounded-2xl p-3 flex flex-col items-center justify-center text-center cursor-pointer shadow-sm">
                     <div class="w-11 h-11 sm:w-12 sm:h-12 rounded-xl bg-teal-500 text-white flex items-center justify-center shadow-md shadow-teal-500/20 mb-2">
                         <i data-lucide="search" class="w-7 h-7"></i>
@@ -239,7 +249,7 @@
                     <span class="text-xs sm:text-sm font-black leading-tight text-slate-800 dark:text-slate-200">Word Search</span>
                 </div>
 
-                <!-- 4. Word Recall (Icon: list-checks, Blue Theme) -->
+                <!-- 4. Word Recall -->
                 <div onclick="launchGame('word_recall')" class="game-card-transition bg-gradient-to-b from-blue-500/10 to-blue-500/5 dark:from-blue-950/30 dark:to-blue-950/15 border-2 border-blue-500/20 hover:border-blue-500 rounded-2xl p-3 flex flex-col items-center justify-center text-center cursor-pointer shadow-sm">
                     <div class="w-11 h-11 sm:w-12 sm:h-12 rounded-xl bg-blue-500 text-white flex items-center justify-center shadow-md shadow-blue-500/20 mb-2">
                         <i data-lucide="list-checks" class="w-7 h-7"></i>
@@ -247,7 +257,7 @@
                     <span class="text-xs sm:text-sm font-black leading-tight text-slate-800 dark:text-slate-200">Word Recall</span>
                 </div>
 
-                <!-- 5. Digit Dash (Icon: calculator, Purple Theme) -->
+                <!-- 5. Digit Dash -->
                 <div onclick="launchGame('digit_dash')" class="game-card-transition bg-gradient-to-b from-purple-500/10 to-purple-500/5 dark:from-purple-950/30 dark:to-purple-950/15 border-2 border-purple-500/20 hover:border-purple-500 rounded-2xl p-3 flex flex-col items-center justify-center text-center cursor-pointer shadow-sm">
                     <div class="w-11 h-11 sm:w-12 sm:h-12 rounded-xl bg-purple-500 text-white flex items-center justify-center shadow-md shadow-purple-500/20 mb-2">
                         <i data-lucide="calculator" class="w-7 h-7"></i>
@@ -255,7 +265,7 @@
                     <span class="text-xs sm:text-sm font-black leading-tight text-slate-800 dark:text-slate-200">Digit Dash</span>
                 </div>
 
-                <!-- 6. Sudoku (Icon: grid-3x3, Pink Theme) -->
+                <!-- 6. Sudoku Joy -->
                 <div onclick="launchGame('sudoku')" class="game-card-transition bg-gradient-to-b from-pink-500/10 to-pink-500/5 dark:from-pink-950/30 dark:to-pink-950/15 border-2 border-pink-500/20 hover:border-pink-500 rounded-2xl p-3 flex flex-col items-center justify-center text-center cursor-pointer shadow-sm">
                     <div class="w-11 h-11 sm:w-12 sm:h-12 rounded-xl bg-pink-500 text-white flex items-center justify-center shadow-md shadow-pink-500/20 mb-2">
                         <i data-lucide="grid-3x3" class="w-7 h-7"></i>
@@ -263,7 +273,7 @@
                     <span class="text-xs sm:text-sm font-black leading-tight text-slate-800 dark:text-slate-200">Sudoku Joy</span>
                 </div>
 
-                <!-- 7. CNA News (Icon: globe, Red Theme) -->
+                <!-- 7. CNA News -->
                 <a href="https://www.channelnewsasia.com/" target="_blank" class="game-card-transition bg-gradient-to-b from-red-500/10 to-red-500/5 dark:from-red-950/30 dark:to-red-950/15 border-2 border-red-500/20 hover:border-red-500 rounded-2xl p-3 flex flex-col items-center justify-center text-center shadow-sm">
                     <div class="w-11 h-11 sm:w-12 sm:h-12 rounded-xl bg-red-500 text-white flex items-center justify-center shadow-md shadow-red-500/20 mb-2">
                         <i data-lucide="globe" class="w-7 h-7"></i>
@@ -271,7 +281,7 @@
                     <span class="text-xs sm:text-sm font-black leading-tight text-slate-800 dark:text-slate-200">CNA News</span>
                 </a>
 
-                <!-- 8. Straits Times (Icon: newspaper, Cyan Theme) -->
+                <!-- 8. Straits Times -->
                 <a href="https://www.straitstimes.com/" target="_blank" class="game-card-transition bg-gradient-to-b from-cyan-500/10 to-cyan-500/5 dark:from-cyan-950/30 dark:to-cyan-950/15 border-2 border-cyan-500/20 hover:border-cyan-500 rounded-2xl p-3 flex flex-col items-center justify-center text-center shadow-sm">
                     <div class="w-11 h-11 sm:w-12 sm:h-12 rounded-xl bg-cyan-500 text-white flex items-center justify-center shadow-md shadow-cyan-500/20 mb-2">
                         <i data-lucide="newspaper" class="w-7 h-7"></i>
@@ -279,7 +289,7 @@
                     <span class="text-xs sm:text-sm font-black leading-tight text-slate-800 dark:text-slate-200">Straits Times</span>
                 </a>
 
-                <!-- 9. CNA Games (Icon: gamepad-2, Orange Theme) -->
+                <!-- 9. CNA Games -->
                 <a href="https://www.channelnewsasia.com/games" target="_blank" class="game-card-transition bg-gradient-to-b from-orange-500/10 to-orange-500/5 dark:from-orange-950/30 dark:to-orange-950/15 border-2 border-orange-500/20 hover:border-orange-500 rounded-2xl p-3 flex flex-col items-center justify-center text-center shadow-sm">
                     <div class="w-11 h-11 sm:w-12 sm:h-12 rounded-xl bg-orange-500 text-white flex items-center justify-center shadow-md shadow-orange-500/20 mb-2">
                         <i data-lucide="gamepad-2" class="w-7 h-7"></i>
@@ -310,7 +320,7 @@
         <!-- GAME VIEW CONTROLLER PANELS -->
         <!-- ============================================== -->
 
-        <!-- --- NEW GAME: LEARN MALAY --- -->
+        <!-- --- GAME: LEARN MALAY --- -->
         <section id="game-learn_malay" class="hidden flex-col gap-4">
             <div class="flex items-center justify-between py-2">
                 <button onclick="exitToDashboard()" class="flex items-center gap-2 px-4 py-2 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 rounded-xl font-bold transition-all text-sm">
@@ -376,7 +386,7 @@
 
             <div class="bg-white dark:bg-[#111827] rounded-3xl p-5 border border-slate-100 dark:border-slate-800/80 shadow-lg flex flex-col gap-4 text-center">
                 <div>
-                    <h2 class="text-2xl font-black text-slate-800 dark:text-white">Picture Match Joy</h2>
+                    <h2 class="text-2xl font-black text-slate-800 dark:text-white font-sans">Picture Match Joy</h2>
                     <p class="text-slate-500 dark:text-slate-400 text-sm mt-1">Tap matching pairs of items. Study the board during initial view time!</p>
                 </div>
 
@@ -427,7 +437,7 @@
         </section>
 
         <!-- --- GAME: WORD SEARCH --- -->
-        <section id="game-word_search" class="hidden flex-col gap-4">
+        <section id="game-word_search" class="hidden flex-col gap-4 animate-fade-in">
             <div class="flex items-center justify-between py-2">
                 <button onclick="exitToDashboard()" class="flex items-center gap-2 px-4 py-2 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 rounded-xl font-bold transition-all text-sm">
                     <i data-lucide="arrow-left" class="w-4 h-4"></i> Exit to Hub
@@ -439,15 +449,15 @@
 
             <div class="bg-white dark:bg-[#111827] rounded-3xl p-5 border border-slate-100 dark:border-slate-800/80 shadow-lg flex flex-col gap-4 text-center">
                 <div>
-                    <h2 class="text-2xl font-black text-slate-800 dark:text-white">Word Search</h2>
-                    <p class="text-slate-500 dark:text-slate-400 text-sm mt-1">Select Difficulty, then tap first & last letters of found words!</p>
+                    <h2 class="text-2xl font-black text-slate-800 dark:text-white font-sans">Word Search</h2>
+                    <p class="text-slate-500 dark:text-slate-400 text-sm mt-1">Tap the first letter, then tap the last letter to select a word. Highly sensitive and optimized for senior touches!</p>
                 </div>
 
                 <!-- Difficulty configuration buttons -->
                 <div class="flex justify-center gap-2">
-                    <button onclick="setWsDifficulty('easy')" id="ws-btn-easy" class="px-4 py-2 rounded-xl text-xs font-bold uppercase bg-indigo-500 text-white transition-all">Easy</button>
-                    <button onclick="setWsDifficulty('medium')" id="ws-btn-medium" class="px-4 py-2 rounded-xl text-xs font-bold uppercase bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 transition-all">Medium</button>
-                    <button onclick="setWsDifficulty('hard')" id="ws-btn-hard" class="px-4 py-2 rounded-xl text-xs font-bold uppercase bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 transition-all">Hard</button>
+                    <button onclick="setWsDifficulty('easy')" id="ws-btn-easy" class="px-4 py-2 rounded-xl text-xs font-bold uppercase bg-indigo-500 text-white transition-all">Easy (6 Words)</button>
+                    <button onclick="setWsDifficulty('medium')" id="ws-btn-medium" class="px-4 py-2 rounded-xl text-xs font-bold uppercase bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 transition-all">Medium (8 Words)</button>
+                    <button onclick="setWsDifficulty('hard')" id="ws-btn-hard" class="px-4 py-2 rounded-xl text-xs font-bold uppercase bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 transition-all">Hard (10 Words)</button>
                 </div>
 
                 <!-- Help Actions: Hint and Give Up -->
@@ -466,9 +476,9 @@
                 </div>
 
                 <!-- Word Search Grid Board -->
-                <div class="bg-slate-50 dark:bg-slate-900 rounded-3xl p-3 inline-block mx-auto max-w-full overflow-hidden select-none">
+                <div class="bg-slate-100 dark:bg-slate-900 rounded-3xl p-3 inline-block mx-auto max-w-full overflow-hidden select-none border-2 border-indigo-100 dark:border-indigo-950/40">
                     <div id="ws-board" class="grid gap-1.5 max-w-xs sm:max-w-md mx-auto">
-                        <!-- Custom dynamic Grid size -->
+                        <!-- Custom dynamic Grid size with easy layout spacing -->
                     </div>
                 </div>
             </div>
@@ -482,17 +492,17 @@
                 </button>
                 <div class="flex items-center gap-3">
                     <span id="wr-set-tracker" class="px-3 py-1 bg-purple-500 text-white text-xs font-bold rounded-lg uppercase">Set 1 of 3</span>
-                    <span id="wr-score-display" class="font-bold text-indigo-500 dark:text-indigo-400">Score: 0</span>
+                    <span id="wr-score-display" class="font-bold text-indigo-500 dark:text-indigo-400 font-sans">Score: 0</span>
                 </div>
             </div>
 
             <div class="bg-white dark:bg-[#111827] rounded-3xl p-6 border border-slate-100 dark:border-slate-800/80 shadow-lg flex flex-col gap-6 text-center">
                 <div>
-                    <h2 class="text-2xl font-black text-slate-800 dark:text-white">Word Recall Trainer</h2>
+                    <h2 class="text-2xl font-black text-slate-800 dark:text-white font-sans">Word Recall Trainer</h2>
                     <p class="text-slate-500 dark:text-slate-400 text-sm mt-1">Memorize the words, then pick them correctly. Complete 3 full sets!</p>
                 </div>
 
-                <!-- Level & Timing Selector Configuration (Visible before session start) -->
+                <!-- Level & Timing Selector Configuration -->
                 <div id="wr-config-panel" class="bg-slate-50 dark:bg-slate-900 rounded-2xl p-4 space-y-4 text-left">
                     <div>
                         <span class="text-xs font-bold uppercase text-slate-400">1. Select Difficulty:</span>
@@ -562,13 +572,13 @@
                 </button>
                 <div class="flex items-center gap-3">
                     <span id="dd-set-tracker" class="px-3 py-1 bg-purple-500 text-white text-xs font-bold rounded-lg uppercase">Set 1 of 6</span>
-                    <span id="dd-score-display" class="font-bold text-indigo-500 dark:text-indigo-400">Score: 0</span>
+                    <span id="dd-score-display" class="font-bold text-indigo-500 dark:text-indigo-400 font-sans">Score: 0</span>
                 </div>
             </div>
 
             <div class="bg-white dark:bg-[#111827] rounded-3xl p-6 border border-slate-100 dark:border-slate-800/80 shadow-lg flex flex-col gap-6 text-center">
                 <div>
-                    <h2 class="text-2xl font-black text-slate-800 dark:text-white">Digit Dash Memory</h2>
+                    <h2 class="text-2xl font-black text-slate-800 dark:text-white font-sans">Digit Dash Memory</h2>
                     <p class="text-slate-500 dark:text-slate-400 text-sm mt-1">A circular countdown will show numbers to memorize. Re-type them to complete each set! (6 sets total)</p>
                 </div>
 
@@ -660,7 +670,7 @@
 
             <div class="bg-white dark:bg-[#111827] rounded-3xl p-5 border border-slate-100 dark:border-slate-800/80 shadow-lg flex flex-col gap-4 text-center">
                 <div>
-                    <h2 class="text-2xl font-black text-slate-800 dark:text-white">Sudoku Joy</h2>
+                    <h2 class="text-2xl font-black text-slate-800 dark:text-white font-sans">Sudoku Joy</h2>
                     <p class="text-slate-500 dark:text-slate-400 text-sm mt-1">Tap a white box on the board, then select a number from the grid below!</p>
                 </div>
 
@@ -713,7 +723,7 @@
 
             <div>
                 <h3 id="modal-title" class="text-2xl font-black text-slate-800 dark:text-white">Fantastic Workout!</h3>
-                <p id="modal-feedback" class="text-slate-500 dark:text-slate-400 text-sm sm:text-base leading-relaxed mt-2">
+                <p id="modal-feedback" class="text-slate-500 dark:text-slate-400 text-sm sm:text-base leading-relaxed mt-2 font-sans">
                     Your neurons are firing, keeping your processing speed at an optimal rate.
                 </p>
             </div>
@@ -729,7 +739,7 @@
                 </div>
                 <div class="flex justify-between">
                     <span class="text-slate-400 font-bold uppercase text-xs">Date & Time:</span>
-                    <strong id="modal-game-date" class="text-slate-700 dark:text-slate-200">--/--/----</strong>
+                    <strong id="modal-game-date" class="text-slate-700 dark:text-slate-200 font-mono">--/--/----</strong>
                 </div>
             </div>
 
@@ -757,8 +767,8 @@
             
             <div class="space-y-3 text-left">
                 <div>
-                    <label class="text-xs font-bold text-slate-400 uppercase">Registered Mobile</label>
-                    <div id="prof-mobile" class="text-lg font-bold mt-1 text-indigo-500">None</div>
+                    <label class="text-xs font-bold text-slate-400 uppercase font-sans">Registered Mobile</label>
+                    <div id="prof-mobile" class="text-lg font-bold mt-1 text-indigo-500 font-mono">None</div>
                 </div>
                 <div class="grid grid-cols-2 gap-2 pt-2">
                     <div class="bg-slate-50 dark:bg-slate-900 p-3 rounded-xl text-center">
@@ -767,7 +777,7 @@
                     </div>
                     <div class="bg-slate-50 dark:bg-slate-900 p-3 rounded-xl text-center">
                         <span class="text-xs font-bold text-slate-400">Total Score</span>
-                        <div id="prof-score" class="text-xl font-black mt-1">0 pts</div>
+                        <div id="prof-score" class="text-xl font-black mt-1 font-mono">0 pts</div>
                     </div>
                 </div>
             </div>
@@ -879,7 +889,7 @@
             const chineseDays = [
                 "初一", "初二", "初三", "初四", "初五", "初六", "初七", "初八", "初九", "初十",
                 "十一", "十二", "十三", "十四", "十五", "十六", "十七", "十八", "十九", "二十",
-                "廿一", "廿二", "廿三", "廿四", "廿五", "廿六", "廿7", "廿八", "廿九", "三十"
+                "廿一", "廿二", "廿三", "廿四", "廿五", "廿六", "廿七", "廿八", "廿九", "三十"
             ];
 
             if (diffDays >= 0 && diffDays < 354) {
@@ -1057,12 +1067,12 @@
             }
 
             logContainer.innerHTML = playerStats.history.map(item => `
-                <div class="flex justify-between items-center py-2 px-3 bg-slate-50 dark:bg-slate-900 rounded-xl border border-slate-100 dark:border-slate-800/60">
+                <div class="flex justify-between items-center py-2 px-3 bg-slate-50 dark:bg-slate-900 rounded-xl border border-slate-100 dark:border-slate-800/60 font-sans">
                     <div>
                         <div class="font-extrabold text-sm text-slate-700 dark:text-slate-300">${item.game}</div>
                         <div class="text-[10px] text-slate-400">${item.date} • ${item.time}</div>
                     </div>
-                    <span class="text-sm font-bold text-emerald-500">+${item.score} pts</span>
+                    <span class="text-sm font-bold text-emerald-500 font-mono">+${item.score} pts</span>
                 </div>
             `).join('');
         }
@@ -1258,15 +1268,13 @@
             loadMalayRound();
         }
 
-        // Web Speech synthesis native engine for Singapore Primary Malay pronounciation
+        // Web Speech synthesis native engine for Singapore Primary Malay pronunciation
         function speakMalayWordAloud(text) {
             if ('speechSynthesis' in window) {
-                // Cancel ongoing synthesis to prevent queuing lag
                 window.speechSynthesis.cancel();
                 const utterance = new SpeechSynthesisUtterance(text);
                 utterance.lang = 'ms-MY'; // Native Bahasa Melayu tag
                 
-                // Fallback check matching Indonesian speech engines if Malay is local-absent
                 const voices = window.speechSynthesis.getVoices();
                 const matchedVoice = voices.find(v => v.lang.startsWith('ms') || v.lang.startsWith('id'));
                 if (matchedVoice) {
@@ -1316,7 +1324,6 @@
                 buttonElement.className = "w-full py-4 px-5 bg-emerald-500 text-white border-2 border-emerald-400 rounded-2xl text-left font-extrabold transition-all text-base min-h-[48px]";
                 lmAccumulatedScore += 50;
                 
-                // Voice Aloud triggering on successful translation
                 speakMalayWordAloud(lmCurrentQuestion.malay);
                 
                 alert("Tahniah! (Congratulations!) Correct translation. Listen to the phrase spoken!");
@@ -1621,8 +1628,8 @@
             const scoreDisp = document.getElementById('ws-score-display');
             if (scoreDisp) scoreDisp.textContent = `Score: ${playerStats.totalScore}`;
             
-            // Grid sizing adjustment for mobile and tablets
-            wsGridSize = wsDifficulty === 'easy' ? 8 : (wsDifficulty === 'medium' ? 10 : 12);
+            // ELDERLY ACCESSIBILITY: Safe grid spacing parameters across mobile viewports
+            wsGridSize = wsDifficulty === 'easy' ? 6 : (wsDifficulty === 'medium' ? 8 : 10);
             
             const board = document.getElementById('ws-board');
             if (board) {
@@ -1633,7 +1640,6 @@
 
             const currentWords = wsWordsList[wsDifficulty];
             currentWords.forEach((word, index) => {
-                // Ensure rows are bound safely within grid size
                 let row = Math.floor((index * (wsGridSize / currentWords.length))) % wsGridSize;
                 let colStart = Math.floor(Math.random() * (wsGridSize - word.length + 1));
                 
@@ -1682,21 +1688,24 @@
                     const found = wsFoundWords.has(w);
                     const colorClass = wsPalette[index % wsPalette.length];
                     return `
-                        <span class="px-3 py-1 rounded-full font-bold text-xs tracking-wide shadow-sm uppercase ${found ? `${colorClass} text-white line-through opacity-60` : 'bg-indigo-50 dark:bg-slate-800 text-indigo-600 dark:text-indigo-400'}">
+                        <span class="px-3.5 py-1.5 rounded-full font-black text-xs tracking-wide shadow-sm uppercase ${found ? `${colorClass} text-white line-through opacity-60` : 'bg-indigo-50 dark:bg-slate-800 text-indigo-600 dark:text-indigo-400'}">
                             ${w}
                         </span>
                     `;
                 }).join('');
             }
 
-            // Render smaller keys for 12x12 so it remains fully inside mobile view limits
-            const cellClass = wsGridSize > 10 ? "w-6 h-6 sm:w-8 sm:h-8 text-xs" : "w-8 h-8 sm:w-10 sm:h-10 text-sm sm:text-base";
+            // ELDERLY EXCELLENCE: Extra generous padding size (min-height 48px target-ready buttons) 
+            // for absolute slip-free clickability, even on compact grids!
+            const cellClass = wsGridSize >= 10 ? "w-8 h-8 sm:w-11 sm:h-11 text-xs" : "w-10 h-10 sm:w-12 sm:h-12 text-sm sm:text-base";
 
             for (let r = 0; r < wsGridSize; r++) {
                 for (let c = 0; c < wsGridSize; c++) {
                     const char = wsGrid[r][c];
                     const cell = document.createElement('button');
-                    cell.className = `${cellClass} rounded-lg font-black flex items-center justify-center transition-all bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700/80 active:scale-95 text-slate-800 dark:text-slate-100`;
+                    
+                    // High-contrast border, rounded comfort design, premium touch response feel
+                    cell.className = `${cellClass} rounded-xl font-black flex items-center justify-center transition-all bg-white dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-700/80 active:scale-95 text-slate-800 dark:text-slate-100 shadow-sm cursor-pointer hover:border-indigo-400`;
                     cell.textContent = char;
                     cell.setAttribute('data-row', r);
                     cell.setAttribute('data-col', c);
@@ -1709,16 +1718,20 @@
         function wsOnCellClick(row, col, cellElement) {
             const alreadySelectedIdx = wsSelectedCells.findIndex(cell => cell.r === row && cell.c === col);
 
+            // Re-select action (toggle off)
             if (alreadySelectedIdx !== -1) {
-                const cellClass = wsGridSize > 10 ? "w-6 h-6 sm:w-8 sm:h-8 text-xs" : "w-8 h-8 sm:w-10 sm:h-10 text-sm sm:text-base";
-                cellElement.className = `${cellClass} rounded-lg font-black flex items-center justify-center transition-all bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700/80 text-slate-800 dark:text-slate-100`;
+                const cellClass = wsGridSize >= 10 ? "w-8 h-8 sm:w-11 sm:h-11 text-xs" : "w-10 h-10 sm:w-12 sm:h-12 text-sm sm:text-base";
+                cellElement.className = `${cellClass} rounded-xl font-black flex items-center justify-center transition-all bg-white dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-700/80 text-slate-800 dark:text-slate-100 shadow-sm hover:border-indigo-400`;
+                cellElement.classList.remove('ws-cell-active');
                 wsSelectedCells.splice(alreadySelectedIdx, 1);
                 return;
             }
 
+            // Highlighting selection with bouncy elastic feel
             wsSelectedCells.push({ r: row, c: col, char: wsGrid[row][col], element: cellElement });
-            cellElement.className = "w-8 h-8 sm:w-10 sm:h-10 rounded-xl font-black text-base sm:text-lg flex items-center justify-center transition-all bg-amber-500 text-white border-2 border-amber-400";
+            cellElement.className = "w-10 h-10 sm:w-12 sm:h-12 rounded-xl font-black text-base sm:text-lg flex items-center justify-center transition-all bg-amber-500 text-white border-2 border-amber-400 shadow-md ws-cell-active";
 
+            // Process matches
             if (wsSelectedCells.length === 2) {
                 const [start, end] = wsSelectedCells;
                 
@@ -1748,7 +1761,7 @@
                     for (let c = cStart; c <= cEnd; c++) {
                         const targetCell = document.querySelector(`[data-row="${r}"][data-col="${c}"]`);
                         if (targetCell) {
-                            targetCell.className = `w-6 h-6 sm:w-10 sm:h-10 rounded-xl font-black text-xs sm:text-lg flex items-center justify-center text-white border-2 border-white/20 ${successColor}`;
+                            targetCell.className = `w-8 h-8 sm:w-12 sm:h-12 rounded-xl font-black text-xs sm:text-lg flex items-center justify-center text-white border-2 border-white/20 ${successColor} shadow-md`;
                             targetCell.disabled = true;
                         }
                     }
@@ -1762,10 +1775,12 @@
                         }, 500);
                     }
                 } else {
+                    // Quick mismatch reset animation
                     setTimeout(() => {
                         wsSelectedCells.forEach(cell => {
-                            const cellClass = wsGridSize > 10 ? "w-6 h-6 sm:w-8 sm:h-8 text-xs" : "w-8 h-8 sm:w-10 sm:h-10 text-sm sm:text-base";
-                            cell.element.className = `${cellClass} rounded-lg font-black flex items-center justify-center transition-all bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700/80 text-slate-800 dark:text-slate-100`;
+                            const cellClass = wsGridSize >= 10 ? "w-8 h-8 sm:w-11 sm:h-11 text-xs" : "w-10 h-10 sm:w-12 sm:h-12 text-sm sm:text-base";
+                            cell.element.className = `${cellClass} rounded-xl font-black flex items-center justify-center transition-all bg-white dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-700/80 text-slate-800 dark:text-slate-100 shadow-sm hover:border-indigo-400`;
+                            cell.element.classList.remove('ws-cell-active');
                         });
                         wsSelectedCells = [];
                     }, 500);
@@ -1814,7 +1829,7 @@
                                 for (let offset = 0; offset < word.length; offset++) {
                                     const cell = document.querySelector(`[data-row="${r}"][data-col="${c + offset}"]`);
                                     if (cell) {
-                                        cell.className = `w-6 h-6 sm:w-10 sm:h-10 rounded-xl font-black text-xs sm:text-lg flex items-center justify-center text-white border-2 border-white/20 ${successColor}`;
+                                        cell.className = `w-8 h-8 sm:w-11 sm:h-11 rounded-xl font-black text-xs sm:text-lg flex items-center justify-center text-white border-2 border-white/20 ${successColor}`;
                                     }
                                 }
                             }
@@ -1831,7 +1846,7 @@
 
 
         // ==============================================
-        // GAME 3: WORD RECALL IMPLEMENTATION (6-Word Hard Match)
+        // GAME 3: WORD RECALL IMPLEMENTATION
         // ==============================================
         const wrCategories = {
             "Household Objects": ["CHAIR", "CLOCK", "TABLE", "LAMP", "DOOR", "PHONE", "MIRROR", "GLASS", "RUG", "SPOON", "PLATE", "SOFA"],
@@ -1893,7 +1908,6 @@
             wrActiveTheme = themes[Math.floor(Math.random() * themes.length)];
             const allWords = wrCategories[wrActiveTheme];
             
-            // Easy is 4 words, Medium is 5 words, Hard is 6 words
             const targetSize = wrLevel === 'easy' ? 4 : (wrLevel === 'medium' ? 5 : 6);
             const shuffled = [...allWords].sort(() => Math.random() - 0.5);
             wrTargetWords = shuffled.slice(0, targetSize);
@@ -2108,10 +2122,10 @@
             if (digitContainer) {
                 digitContainer.textContent = ddCurrentDigits;
 
-                // SENIOR COGNITIVE ADJUSTMENT: Exact line height and font size fitting inside the circle 1-line
+                // Dynamic font scaling ensuring safe single-line placement
                 const length = ddCurrentDigits.length;
                 if (length >= 10) {
-                    digitContainer.style.fontSize = "1.5rem"; // guaranteed to not overflow
+                    digitContainer.style.fontSize = "1.5rem"; 
                     digitContainer.style.letterSpacing = "0.02em";
                 } else if (length === 9) {
                     digitContainer.style.fontSize = "1.75rem";
@@ -2392,7 +2406,7 @@
                 const cfgPanel = document.getElementById('wr-config-panel');
                 if (cfgPanel) cfgPanel.classList.remove('hidden');
                 const memPanel = document.getElementById('wr-phase-memorize');
-                if (memPanel) memPanel.classList.add('hidden');
+                if (memPanel) memPanel.classList.remove('hidden');
                 const recPanel = document.getElementById('wr-phase-recall');
                 if (recPanel) recPanel.classList.add('hidden');
                 setWrLevel('easy');
