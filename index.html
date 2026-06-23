@@ -459,7 +459,7 @@ tailwind.config = {
         <i data-lucide="arrow-left" class="w-5 h-5"></i> Exit to Hub
       </button>
       <div class="flex items-center gap-3">
-        <span id="lm-round-tracker" class="px-3 py-2 bg-amber-500 text-white text-sm font-bold rounded-xl uppercase">Round 1 of 3</span>
+        <span id="lm-round-indicator" class="px-3 py-2 bg-amber-500 text-white text-sm font-bold rounded-xl uppercase">Round 1 of 3</span>
         <span id="lm-score-display" class="font-bold text-amber-500 text-base">Score: 0</span>
       </div>
     </div>
@@ -472,9 +472,9 @@ tailwind.config = {
 
       <!-- Difficulty -->
       <div class="flex justify-center gap-2">
-        <button onclick="setMalayLevel('easy')" id="lm-btn-easy" class="config-btn bg-amber-500 text-white">Easy</button>
-        <button onclick="setMalayLevel('medium')" id="lm-btn-medium" class="config-btn bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300">Medium</button>
-        <button onclick="setMalayLevel('hard')" id="lm-btn-hard" class="config-btn bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300">Hard</button>
+        <button onclick="setLmLevel('easy')" id="lm-btn-easy" class="config-btn bg-amber-500 text-white">Easy</button>
+        <button onclick="setLmLevel('medium')" id="lm-btn-medium" class="config-btn bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300">Medium</button>
+        <button onclick="setLmLevel('hard')" id="lm-btn-hard" class="config-btn bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300">Hard</button>
       </div>
 
       <!-- Word Card -->
@@ -485,10 +485,10 @@ tailwind.config = {
 
       <!-- Hint / Give Up -->
       <div class="grid grid-cols-2 gap-3 max-w-sm mx-auto w-full">
-        <button onclick="malayTriggerHint()" class="helper-btn bg-amber-50 hover:bg-amber-100 dark:bg-amber-950/20 text-amber-600 dark:text-amber-400">
+        <button onclick="lmTriggerHint()" class="helper-btn bg-amber-50 hover:bg-amber-100 dark:bg-amber-950/20 text-amber-600 dark:text-amber-400">
           <i data-lucide="lightbulb" class="w-5 h-5"></i> Hide 1 Wrong
         </button>
-        <button onclick="malayTriggerGiveUp()" class="helper-btn bg-red-50 hover:bg-red-100 dark:bg-red-950/20 text-red-600 dark:text-red-400">
+        <button onclick="lmTriggerGiveUp()" class="helper-btn bg-red-50 hover:bg-red-100 dark:bg-red-950/20 text-red-600 dark:text-red-400">
           <i data-lucide="eye" class="w-5 h-5"></i> Show Answer
         </button>
       </div>
@@ -496,7 +496,8 @@ tailwind.config = {
       <!-- Multiple Choice -->
       <div class="space-y-3 max-w-sm mx-auto w-full">
         <div class="text-sm font-bold text-slate-400 uppercase tracking-wide">Choose the Correct English Translation:</div>
-        <div id="lm-options-container" class="grid grid-cols-1 gap-3"></div>
+        <p id="lm-hint-text" class="hidden text-sm text-amber-600 font-bold"></p>
+<div id="lm-options" class="grid grid-cols-1 gap-3"></div>
       </div>
     </div>
   </section>
@@ -1018,7 +1019,7 @@ function addToLog(gameName, result, points) {
   const timeStr = now.toLocaleTimeString('en-SG', { hour: '2-digit', minute: '2-digit' });
   state.dailyLog.unshift({ game: gameName, result, points, time: timeStr });
   state.totalScore += points;
-  $('total-score').textContent = state.totalScore;
+if ($('dash-score')) $('dash-score').textContent = state.totalScore;
   renderLog();
 }
 
@@ -1094,6 +1095,12 @@ function confirmShareWhatsApp() {
 
 function closeShareModal() {
   $('share-modal').classList.add('hidden');
+function toggleTheme() {
+  state.darkMode = !state.darkMode;
+  document.documentElement.classList.toggle('dark', state.darkMode);
+  const icon = $('theme-icon');
+  icon.setAttribute('data-lucide', state.darkMode ? 'sun' : 'moon');
+  lucide.createIcons();
 }
 
 // ================================================
@@ -1749,7 +1756,7 @@ function submitWrAnswer() {
     if (correct.includes(w)) {
       btn.classList.add('border-emerald-500', 'bg-emerald-50', 'dark:bg-emerald-950/20', 'text-emerald-600');
     } else if (selected.includes(w)) {
-      btn.classList.add('border-red      btn.classList.add('border-red-500', 'bg-red-50', 'dark:bg-red-950/20', 'text-red-500');
+btn.classList.add('border-red-500', 'bg-red-50', 'dark:bg-red-950/20', 'text-red-500');
     }
   });
 
@@ -2051,7 +2058,7 @@ function playAgain() {
 }
 
 function addToLog(gameName, detail, points) {
-  const log = state.activityLog;
+  const log = state.dailyLog;
   const entry = {
     game: gameName,
     detail,
@@ -2064,7 +2071,7 @@ function addToLog(gameName, detail, points) {
 }
 
 function renderActivityLog() {
-  const container = $('activity-log');
+  const container = $('stats-log-list');
   if (!container) return;
   if (state.activityLog.length === 0) {
     container.innerHTML = `<p class="text-slate-400 dark:text-slate-500 text-sm text-center py-4">No activity yet. Start playing!</p>`;
