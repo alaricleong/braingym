@@ -972,11 +972,11 @@ function toggleTheme() {
 function loginUser() {
   const input = $('mobile-number');
   const mobile = input ? input.value.trim() : '';
-  if (!mobile || mobile.length < 6) {
-    showToast('Please enter a valid mobile number.');
-    return;
-  }
-  const label = $('dash-user-label');
+if (!mobile || mobile.length < 4) {
+showToast('Please enter a valid mobile number.');
+return;
+}
+const label = $('dash-user-label');
   if (label) label.textContent = mobile;
   showDashboard();
 }
@@ -2282,6 +2282,10 @@ function msTriggerGiveUp() {
 // INITIALISATION
 // ================================================
 document.addEventListener('DOMContentLoaded', () => {
-lucide.createIcons();
+if (typeof lucide !== 'undefined') lucide.createIcons();
 renderLog();
+});
+
+window.addEventListener('load', () => {
+if (typeof lucide !== 'undefined') lucide.createIcons();
 });
