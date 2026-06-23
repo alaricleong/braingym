@@ -913,17 +913,11 @@ const state = {
   totalScore: 0,
   dailyLog: [],
   darkMode: false,
-  // Learn Malay
   lm: { level: 'easy', score: 0, round: 1, totalRounds: 3, currentPhrase: null, options: [], hintsUsed: 0 },
-  // Picture Match
   pm: { difficulty: 'easy', viewTime: 5, score: 0, moves: 0, pairs: 6, board: [], flipped: [], matched: [], hintCount: 3, timerInterval: null },
-  // Word Search
   ws: { difficulty: 'easy', score: 0, grid: [], words: [], foundWords: [], selectStart: null, hintUsed: false },
-  // Word Recall
   wr: { level: 'easy', timerSec: 8, score: 0, set: 1, totalSets: 3, currentWords: [], allWords: [], timerInterval: null, selectedWords: [] },
-  // Digit Dash
   dd: { digitLength: 8, viewTime: 10, score: 0, set: 1, totalSets: 6, currentDigits: '', timerInterval: null, ringInterval: null },
-  // Sudoku
   sk: { difficulty: 'easy', score: 0, board: [], solution: [], selectedCell: null, errors: 0, hintCount: 3, timerInterval: null, elapsedSec: 0 }
 };
 
@@ -934,9 +928,11 @@ function $(id) { return document.getElementById(id); }
 
 function showToast(msg, duration = 2500) {
   const t = $('toast');
+  if (!t) return;
   t.textContent = msg;
   t.classList.remove('hidden');
-  setTimeout(() => t.classList.add('hidden'), duration);
+  clearTimeout(state.toastTimeout);
+  state.toastTimeout = setTimeout(() => t.classList.add('hidden'), duration);
 }
 
 function shuffle(arr) {
@@ -957,6 +953,54 @@ function formatTime(sec) {
 }
 
 // ================================================
+// THEME
+// ================================================
+function toggleTheme() {
+  state.darkMode = !state.darkMode;
+  document.documentElement.classList.toggle('dark', state.darkMode);
+  const icon = $('theme-icon');
+  if (icon) {
+    icon.setAttribute('data-lucide', state.darkMode ? 'sun' : 'moon');
+    lucide.createIcons();
+  }
+}
+
+// ================================================
+// LOGIN
+// ================================================
+function loginUser() {
+  const input = $('mobile-number');
+  const mobile = input ? input.value.trim() : '';
+  if (!mobile || mobile.length < 6) {
+    showToast('Please enter a valid mobile number.');
+    return;
+  }
+  const label = $('dash-user-label');
+  if (label) label.textContent = mobile;
+  showDashboard();
+}
+
+function bypassLogin() {
+  const label = $('dash-user-label');
+  if (label) label.textContent = 'Guest';
+  showDashboard();
+}
+
+function showDashboard() {
+  document.querySelectorAll('main > section').forEach(s => {
+    s.classList.add('hidden');
+    s.classList.remove('flex');
+  });
+  const dash = $('screen-dashboard');
+  if (dash) {
+    dash.classList.remove('hidden');
+    dash.classList.add('flex');
+  }
+  state.currentGame = 'dashboard';
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// ================================================
 // NAVIGATION
 // ================================================
 function launchGame(gameId) {
@@ -964,13 +1008,12 @@ function launchGame(gameId) {
     s.classList.add('hidden');
     s.classList.remove('flex');
   });
-  const target = $(`game-${gameId}`);
+  const target = $('game-' + gameId);
   if (target) {
     target.classList.remove('hidden');
     target.classList.add('flex');
     state.currentGame = gameId;
     window.scrollTo({ top: 0, behavior: 'smooth' });
-    // Init game on launch
     if (gameId === 'learn_malay') initLearnMalay();
     if (gameId === 'picture_match') initPmConfig();
     if (gameId === 'word_search') initWordSearch();
@@ -982,14 +1025,7 @@ function launchGame(gameId) {
 
 function exitToDashboard() {
   clearAllTimers();
-  document.querySelectorAll('main > section').forEach(s => {
-    s.classList.add('hidden');
-    s.classList.remove('flex');
-  });
-  $('screen-dashboard').classList.remove('hidden');
-  $('screen-dashboard').classList.add('flex');
-  state.currentGame = 'dashboard';
-  window.scrollTo({ top: 0, behavior: 'smooth' });
+  showDashboard();
 }
 
 function clearAllTimers() {
@@ -1001,17 +1037,6 @@ function clearAllTimers() {
 }
 
 // ================================================
-// DARK MODE
-// ================================================
-function toggleDarkMode() {
-  state.darkMode = !state.darkMode;
-  document.documentElement.classList.toggle('dark', state.darkMode);
-  const icon = $('dark-mode-icon');
-  icon.setAttribute('data-lucide', state.darkMode ? 'sun' : 'moon');
-  lucide.createIcons();
-}
-
-// ================================================
 // SCORE & LOG
 // ================================================
 function addToLog(gameName, result, points) {
@@ -1019,14 +1044,16 @@ function addToLog(gameName, result, points) {
   const timeStr = now.toLocaleTimeString('en-SG', { hour: '2-digit', minute: '2-digit' });
   state.dailyLog.unshift({ game: gameName, result, points, time: timeStr });
   state.totalScore += points;
-if ($('dash-score')) $('dash-score').textContent = state.totalScore;
+  const scoreEl = $('dash-score');
+  if (scoreEl) scoreEl.textContent = state.totalScore;
   renderLog();
 }
 
 function renderLog() {
   const container = $('stats-log-list');
+  if (!container) return;
   if (state.dailyLog.length === 0) {
-    container.innerHTML = `<div class="text-center text-slate-400 py-6 text-sm">No exercises logged yet today. Complete a game to track!</div>`;
+    container.innerHTML = '<div class="text-center text-slate-400 py-6 text-sm">No exercises logged yet today. Complete a game to track!</div>';
     return;
   }
   container.innerHTML = state.dailyLog.map(entry => `
@@ -1045,7 +1072,8 @@ function renderLog() {
 function clearHistory() {
   state.dailyLog = [];
   state.totalScore = 0;
-  $('total-score').textContent = '0';
+  const scoreEl = $('dash-score');
+  if (scoreEl) scoreEl.textContent = '0';
   renderLog();
   showToast('Exercise log cleared!');
 }
@@ -1076,10 +1104,7 @@ function closeResultModal(playAgain) {
 // SHARE MODAL
 // ================================================
 function shareDashboardHistory() {
-  if (state.dailyLog.length === 0) {
-    showToast('No records to share yet!');
-    return;
-  }
+  if (state.dailyLog.length === 0) { showToast('No records to share yet!'); return; }
   const lines = state.dailyLog.map(e => `• ${e.game}: ${e.result} (${e.points > 0 ? '+' : ''}${e.points} pts) @ ${e.time}`).join('\n');
   const text = `🧠 My Brain Exercise Records Today!\n\n${lines}\n\n🏆 Total Score: ${state.totalScore} pts\n\nKeep your mind sharp every day! 💪`;
   $('share-preview').textContent = text;
@@ -1089,20 +1114,12 @@ function shareDashboardHistory() {
 function confirmShareWhatsApp() {
   const text = $('share-preview').textContent;
   const encoded = encodeURIComponent(text);
-  window.open(`https://wa.me/?text=${encoded}`, '_blank');
+  window.open('https://wa.me/?text=' + encoded, '_blank');
   closeShareModal();
 }
 
 function closeShareModal() {
   $('share-modal').classList.add('hidden');
-}
-
-function toggleTheme() {
-  state.darkMode = !state.darkMode;
-  document.documentElement.classList.toggle('dark', state.darkMode);
-  const icon = $('theme-icon');
-  icon.setAttribute('data-lucide', state.darkMode ? 'sun' : 'moon');
-  lucide.createIcons();
 }
 
 // ================================================
@@ -1158,33 +1175,29 @@ function initLearnMalay() {
 function setLmLevel(level) {
   state.lm.level = level;
   ['easy', 'medium', 'hard'].forEach(l => {
-    const btn = $(`lm-level-${l}`);
-    btn.className = `config-btn ${l === level ? 'bg-violet-500 text-white' : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300'}`;
+    const btn = $('lm-btn-' + l);
+    if (btn) btn.className = 'config-btn ' + (l === level ? 'bg-amber-500 text-white' : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300');
   });
   initLearnMalay();
 }
 
 function renderLmRound() {
   const data = shuffle(MALAY_DATA[state.lm.level]);
-  const item = data[Math.floor(Math.random() * data.length)];
+  const item = data[0];
   state.lm.currentPhrase = item;
-
-  // Build 4 options: correct + 3 random distractors
   const distractors = shuffle(item.distractors).slice(0, 3);
   state.lm.options = shuffle([item.answer, ...distractors]);
-
-  $('lm-round-indicator').textContent = `Round ${state.lm.round} of ${state.lm.totalRounds}`;
+  const roundEl = $('lm-round-indicator');
+  if (roundEl) roundEl.textContent = 'Round ' + state.lm.round + ' of ' + state.lm.totalRounds;
   $('lm-phrase-display').textContent = item.phrase;
-  $('lm-hint-text').textContent = '';
-  $('lm-hint-text').classList.add('hidden');
-
+  const hintEl = $('lm-hint-text');
+  if (hintEl) { hintEl.textContent = ''; hintEl.classList.add('hidden'); }
   const optContainer = $('lm-options');
   optContainer.innerHTML = state.lm.options.map((opt, i) => `
     <button onclick="checkLmAnswer(${i})"
       class="lm-option-btn w-full py-3 px-4 rounded-2xl border-2 border-slate-200 dark:border-slate-700
              bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-200 font-bold text-base
-             hover:border-violet-400 hover:bg-violet-50 dark:hover:bg-violet-950/20 transition-all duration-200"
-      data-index="${i}">
+             hover:border-amber-400 hover:bg-amber-50 dark:hover:bg-amber-950/20 transition-all duration-200">
       ${opt}
     </button>
   `).join('');
@@ -1194,36 +1207,23 @@ function checkLmAnswer(index) {
   const selected = state.lm.options[index];
   const correct = state.lm.currentPhrase.answer;
   const buttons = document.querySelectorAll('.lm-option-btn');
-
   buttons.forEach(btn => btn.disabled = true);
-
   if (selected === correct) {
-    buttons[index].classList.add('border-emerald-500', 'bg-emerald-50', 'dark:bg-emerald-950/20', 'text-emerald-600');
+    buttons[index].classList.add('border-emerald-500', 'bg-emerald-50', 'text-emerald-600');
     state.lm.score += 10;
-    $('lm-score-display').textContent = `Score: ${state.lm.score}`;
+    $('lm-score-display').textContent = 'Score: ' + state.lm.score;
     showToast('Correct! 🎉');
   } else {
-    buttons[index].classList.add('border-red-500', 'bg-red-50', 'dark:bg-red-950/20', 'text-red-500');
-    // Highlight correct answer
+    buttons[index].classList.add('border-red-500', 'bg-red-50', 'text-red-500');
     buttons.forEach(btn => {
-      if (btn.textContent.trim() === correct) {
-        btn.classList.add('border-emerald-500', 'bg-emerald-50', 'dark:bg-emerald-950/20', 'text-emerald-600');
-      }
+      if (btn.textContent.trim() === correct) btn.classList.add('border-emerald-500', 'bg-emerald-50', 'text-emerald-600');
     });
-    showToast(`Oops! The answer is: ${correct}`);
+    showToast('Oops! The answer is: ' + correct);
   }
-
   setTimeout(() => {
     if (state.lm.round >= state.lm.totalRounds) {
-      const points = state.lm.score;
-      addToLog('Learn Malay', `${state.lm.score}/${state.lm.totalRounds * 10} pts`, points);
-      showResultModal({
-        icon: '🇸🇬',
-        title: 'Round Complete!',
-        message: `You scored ${state.lm.score} out of ${state.lm.totalRounds * 10}. Keep practising your Malay!`,
-        points,
-        gameId: 'learn_malay'
-      });
+      addToLog('Learn Malay', state.lm.score + '/' + (state.lm.totalRounds * 10) + ' pts', state.lm.score);
+      showResultModal({ icon: '🇸🇬', title: 'Round Complete!', message: 'You scored ' + state.lm.score + ' out of ' + (state.lm.totalRounds * 10) + '. Keep practising!', points: state.lm.score, gameId: 'learn_malay' });
     } else {
       state.lm.round++;
       renderLmRound();
@@ -1234,32 +1234,25 @@ function checkLmAnswer(index) {
 function lmTriggerHint() {
   const item = state.lm.currentPhrase;
   if (!item) return;
-  state.lm.hintsUsed++;
   const hintEl = $('lm-hint-text');
-  // Give first letter of the answer as hint
-  hintEl.textContent = `Hint: The answer starts with "${item.answer[0]}" and has ${item.answer.length} characters.`;
-  hintEl.classList.remove('hidden');
-  showToast('Hint revealed! (-2 pts if correct)');
+  if (hintEl) {
+    hintEl.textContent = 'Hint: The answer starts with "' + item.answer[0] + '" and has ' + item.answer.length + ' characters.';
+    hintEl.classList.remove('hidden');
+  }
+  showToast('Hint revealed!');
 }
 
 function lmTriggerGiveUp() {
   const item = state.lm.currentPhrase;
   if (!item) return;
   const hintEl = $('lm-hint-text');
-  hintEl.textContent = `Answer: ${item.answer}`;
-  hintEl.classList.remove('hidden');
+  if (hintEl) { hintEl.textContent = 'Answer: ' + item.answer; hintEl.classList.remove('hidden'); }
   document.querySelectorAll('.lm-option-btn').forEach(btn => btn.disabled = true);
   showToast('Answer revealed. Try the next one!');
   setTimeout(() => {
     if (state.lm.round >= state.lm.totalRounds) {
-      addToLog('Learn Malay', `Gave up · ${state.lm.score} pts`, state.lm.score);
-      showResultModal({
-        icon: '😅',
-        title: 'Session Ended',
-        message: `You revealed the answer. Final score: ${state.lm.score} pts. Keep practising!`,
-        points: state.lm.score,
-        gameId: 'learn_malay'
-      });
+      addToLog('Learn Malay', 'Gave up · ' + state.lm.score + ' pts', state.lm.score);
+      showResultModal({ icon: '😅', title: 'Session Ended', message: 'Final score: ' + state.lm.score + ' pts. Keep practising!', points: state.lm.score, gameId: 'learn_malay' });
     } else {
       state.lm.round++;
       renderLmRound();
@@ -1280,42 +1273,47 @@ const PM_EMOJIS = [
 function initPmConfig() {
   state.pm.score = 0;
   state.pm.moves = 0;
-  $('pm-score-display').textContent = 'Score: 0';
-  $('pm-moves-display').textContent = 'Moves: 0';
+  const scoreEl = $('pm-score-display');
+  if (scoreEl) scoreEl.textContent = 'Score: 0';
+  const movesEl = $('pm-moves');
+  if (movesEl) movesEl.textContent = '0';
   clearInterval(state.pm.timerInterval);
-  $('pm-timer-badge').textContent = '00:00';
+  const timerEl = $('pm-timer-badge');
+  if (timerEl) timerEl.textContent = '00:00';
 }
 
 function setPmDifficulty(diff) {
   state.pm.difficulty = diff;
   const pairsMap = { easy: 6, medium: 10, hard: 15 };
-  const viewMap = { easy: 5, medium: 4, hard: 3 };
   state.pm.pairs = pairsMap[diff];
-  state.pm.viewTime = viewMap[diff];
   ['easy', 'medium', 'hard'].forEach(d => {
-    const btn = $(`pm-diff-${d}`);
-    btn.className = `config-btn ${d === diff ? 'bg-sky-500 text-white' : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300'}`;
+    const btn = $('pm-diff-' + d);
+    if (btn) btn.className = 'config-btn ' + (d === diff ? 'bg-emerald-500 text-white' : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300');
   });
 }
 
-function startPictureMatch() {
+function setPmViewTime(t) {
+  state.pm.viewTime = t;
+  [2, 5, 10].forEach(v => {
+    const btn = $('pm-time-' + v);
+    if (btn) btn.className = 'config-btn ' + (v === t ? 'bg-emerald-500 text-white' : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300');
+  });
+}
+
+function initPictureMatch() {
   clearInterval(state.pm.timerInterval);
   state.pm.moves = 0;
   state.pm.flipped = [];
   state.pm.matched = [];
   state.pm.hintCount = 3;
-  $('pm-hint-count').textContent = '3';
-  $('pm-moves-display').textContent = 'Moves: 0';
-
+  const hintEl = $('pm-hint-count');
+  if (hintEl) hintEl.textContent = '3';
+  const movesEl = $('pm-moves');
+  if (movesEl) movesEl.textContent = '0';
   const emojis = shuffle(PM_EMOJIS).slice(0, state.pm.pairs);
-  const cards = shuffle([...emojis, ...emojis]).map((emoji, i) => ({
-    id: i, emoji, flipped: true, matched: false
-  }));
+  const cards = shuffle([...emojis, ...emojis]).map((emoji, i) => ({ id: i, emoji, flipped: true, matched: false }));
   state.pm.board = cards;
-
   renderPmBoard();
-
-  // Show all cards briefly, then flip face down
   setTimeout(() => {
     state.pm.board.forEach(c => c.flipped = false);
     renderPmBoard();
@@ -1328,23 +1326,21 @@ function startPmTimer() {
   clearInterval(state.pm.timerInterval);
   state.pm.timerInterval = setInterval(() => {
     elapsed++;
-    $('pm-timer-badge').textContent = formatTime(elapsed);
+    const el = $('pm-timer-badge');
+    if (el) el.textContent = formatTime(elapsed);
   }, 1000);
 }
 
 function renderPmBoard() {
   const cols = state.pm.pairs <= 6 ? 4 : state.pm.pairs <= 10 ? 5 : 6;
   const board = $('pm-board');
-  board.className = `grid gap-2 mx-auto w-fit`;
-  board.style.gridTemplateColumns = `repeat(${cols}, minmax(0, 1fr))`;
-
+  board.style.gridTemplateColumns = 'repeat(' + cols + ', minmax(0, 1fr))';
   board.innerHTML = state.pm.board.map(card => `
     <button onclick="flipPmCard(${card.id})"
-      class="pm-card w-14 h-14 rounded-2xl flex items-center justify-center text-2xl font-bold
-             transition-all duration-300 select-none
-             ${card.matched ? 'bg-emerald-100 dark:bg-emerald-950/30 border-2 border-emerald-400 cursor-default scale-95 opacity-60' :
-               card.flipped ? 'bg-sky-100 dark:bg-sky-950/30 border-2 border-sky-400 shadow-md' :
-               'bg-slate-200 dark:bg-slate-700 border-2 border-slate-300 dark:border-slate-600 hover:bg-slate-300 dark:hover:bg-slate-600 cursor-pointer'}"
+      class="w-14 h-14 rounded-2xl flex items-center justify-center text-2xl font-bold transition-all duration-300
+             ${card.matched ? 'bg-emerald-100 border-2 border-emerald-400 opacity-60' :
+               card.flipped ? 'bg-sky-100 border-2 border-sky-400 shadow-md' :
+               'bg-slate-200 dark:bg-slate-700 border-2 border-slate-300 cursor-pointer'}"
       ${card.matched ? 'disabled' : ''}>
       ${card.flipped || card.matched ? card.emoji : '?'}
     </button>
@@ -1354,14 +1350,13 @@ function renderPmBoard() {
 function flipPmCard(id) {
   const card = state.pm.board[id];
   if (card.flipped || card.matched || state.pm.flipped.length >= 2) return;
-
   card.flipped = true;
   state.pm.flipped.push(id);
   renderPmBoard();
-
   if (state.pm.flipped.length === 2) {
     state.pm.moves++;
-    $('pm-moves-display').textContent = `Moves: ${state.pm.moves}`;
+    const movesEl = $('pm-moves');
+    if (movesEl) movesEl.textContent = state.pm.moves;
     const [a, b] = state.pm.flipped;
     if (state.pm.board[a].emoji === state.pm.board[b].emoji) {
       state.pm.board[a].matched = true;
@@ -1373,17 +1368,10 @@ function flipPmCard(id) {
         clearInterval(state.pm.timerInterval);
         const points = Math.max(10, 100 - state.pm.moves * 2);
         state.pm.score += points;
-        $('pm-score-display').textContent = `Score: ${state.pm.score}`;
-        addToLog('Picture Match', `${state.pm.moves} moves`, points);
-        setTimeout(() => {
-          showResultModal({
-            icon: '🧩',
-            title: 'Puzzle Complete!',
-            message: `You matched all pairs in ${state.pm.moves} moves. Great memory!`,
-            points,
-            gameId: 'picture_match'
-          });
-        }, 500);
+        const scoreEl = $('pm-score-display');
+        if (scoreEl) scoreEl.textContent = 'Score: ' + state.pm.score;
+        addToLog('Picture Match', state.pm.moves + ' moves', points);
+        setTimeout(() => showResultModal({ icon: '🧩', title: 'Puzzle Complete!', message: 'You matched all pairs in ' + state.pm.moves + ' moves!', points, gameId: 'picture_match' }), 500);
       }
     } else {
       setTimeout(() => {
@@ -1398,9 +1386,9 @@ function flipPmCard(id) {
 
 function pmTriggerHint() {
   if (state.pm.hintCount <= 0) { showToast('No hints left!'); return; }
-  // Briefly reveal all unmatched cards
   state.pm.hintCount--;
-  $('pm-hint-count').textContent = state.pm.hintCount;
+  const hintEl = $('pm-hint-count');
+  if (hintEl) hintEl.textContent = state.pm.hintCount;
   state.pm.board.forEach(c => { if (!c.matched) c.flipped = true; });
   renderPmBoard();
   setTimeout(() => {
@@ -1426,23 +1414,24 @@ const WS_WORDS = {
   medium: ['APPLE', 'BRAVE', 'CLOUD', 'DANCE', 'EAGLE', 'FLAME', 'GRACE', 'HEART', 'IVORY', 'JEWEL'],
   hard: ['BUTTERFLY', 'CHAMPION', 'DINOSAUR', 'ELEPHANT', 'FOUNTAIN', 'GRATEFUL', 'HOSPITAL', 'INNOCENT', 'JEALOUSY', 'KEYBOARD']
 };
-
 const WS_GRID_SIZE = { easy: 10, medium: 12, hard: 15 };
 
 function initWordSearch() {
   state.ws.score = 0;
   state.ws.foundWords = [];
   state.ws.selectStart = null;
+  state.ws.currentSelection = [];
   state.ws.hintUsed = false;
-  $('ws-score-display').textContent = 'Score: 0';
+  const scoreEl = $('ws-score-display');
+  if (scoreEl) scoreEl.textContent = 'Score: 0';
   generateWordSearch();
 }
 
 function setWsDifficulty(diff) {
   state.ws.difficulty = diff;
   ['easy', 'medium', 'hard'].forEach(d => {
-    const btn = $(`ws-diff-${d}`);
-    btn.className = `config-btn ${d === diff ? 'bg-teal-500 text-white' : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300'}`;
+    const btn = $('ws-btn-' + d);
+    if (btn) btn.className = 'config-btn ' + (d === diff ? 'bg-teal-500 text-white' : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300');
   });
   initWordSearch();
 }
@@ -1453,15 +1442,9 @@ function generateWordSearch() {
   const wordsToPlace = wordPool.slice(0, 5);
   state.ws.words = wordsToPlace;
   state.ws.foundWords = [];
-
-  // Init empty grid
   const grid = Array.from({ length: size }, () => Array(size).fill(''));
   const placed = [];
-
-  const directions = [
-    [0, 1], [1, 0], [1, 1], [0, -1], [-1, 0], [-1, -1], [1, -1], [-1, 1]
-  ];
-
+  const directions = [[0,1],[1,0],[1,1],[0,-1],[-1,0],[-1,-1],[1,-1],[-1,1]];
   for (const word of wordsToPlace) {
     let success = false;
     for (let attempt = 0; attempt < 100 && !success; attempt++) {
@@ -1484,15 +1467,12 @@ function generateWordSearch() {
       }
     }
   }
-
-  // Fill remaining with random letters
-  const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+    const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
   for (let r = 0; r < size; r++) {
     for (let c = 0; c < size; c++) {
       if (grid[r][c] === '') grid[r][c] = letters[randInt(0, 25)];
     }
   }
-
   state.ws.grid = grid;
   state.ws.placedWords = placed;
   renderWordSearch();
@@ -1503,22 +1483,15 @@ function renderWordSearch() {
   const grid = state.ws.grid;
   const size = grid.length;
   const board = $('ws-board');
-  board.style.gridTemplateColumns = `repeat(${size}, minmax(0, 1fr))`;
-
+  board.style.gridTemplateColumns = 'repeat(' + size + ', minmax(0, 1fr))';
   board.innerHTML = grid.map((row, r) =>
     row.map((letter, c) => {
       const isFound = isWsCellFound(r, c);
       const isSelected = isWsCellSelected(r, c);
-      return `
-        <button onclick="wsSelectCell(${r}, ${c})"
-          class="ws-cell aspect-square flex items-center justify-center text-xs font-black rounded-lg
-                 transition-all duration-150 select-none
-                 ${isFound ? 'bg-teal-400 dark:bg-teal-600 text-white' :
-                   isSelected ? 'bg-amber-300 dark:bg-amber-600 text-white' :
-                   'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 hover:bg-teal-100 dark:hover:bg-teal-900/30'}"
-          data-r="${r}" data-c="${c}">
-          ${letter}
-        </button>`;
+      return `<button onclick="wsSelectCell(${r}, ${c})"
+        class="ws-cell aspect-square flex items-center justify-center text-xs font-black rounded-lg transition-all duration-150
+               ${isFound ? 'bg-teal-400 text-white' : isSelected ? 'bg-amber-300 text-white' : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200'}"
+        data-r="${r}" data-c="${c}">${letter}</button>`;
     }).join('')
   ).join('');
 }
@@ -1546,46 +1519,31 @@ function wsSelectCell(r, c) {
     const len = Math.max(Math.abs(dr), Math.abs(dc));
     const stepR = dr === 0 ? 0 : dr / Math.abs(dr);
     const stepC = dc === 0 ? 0 : dc / Math.abs(dc);
-
-    // Only allow straight lines
     if (dr !== 0 && dc !== 0 && Math.abs(dr) !== Math.abs(dc)) {
       state.ws.selectStart = null;
       state.ws.currentSelection = [];
       renderWordSearch();
       return;
     }
-
     const cells = [];
-    for (let i = 0; i <= len; i++) {
-      cells.push([sr + stepR * i, sc + stepC * i]);
-    }
+    for (let i = 0; i <= len; i++) cells.push([sr + stepR * i, sc + stepC * i]);
     const word = cells.map(([cr, cc]) => state.ws.grid[cr][cc]).join('');
     const wordRev = word.split('').reverse().join('');
-
     const matched = state.ws.words.find(w => w === word || w === wordRev);
     if (matched && !state.ws.foundWords.includes(matched)) {
       state.ws.foundWords.push(matched);
       state.ws.score += 20;
-      $('ws-score-display').textContent = `Score: ${state.ws.score}`;
-      showToast(`Found: ${matched}! 🎉`);
+      const scoreEl = $('ws-score-display');
+      if (scoreEl) scoreEl.textContent = 'Score: ' + state.ws.score;
+      showToast('Found: ' + matched + '! 🎉');
       renderWsWordList();
-
       if (state.ws.foundWords.length === state.ws.words.length) {
-        addToLog('Word Search', `All ${state.ws.words.length} words found`, state.ws.score);
-        setTimeout(() => {
-          showResultModal({
-            icon: '🔍',
-            title: 'All Words Found!',
-            message: `Excellent! You found all ${state.ws.words.length} hidden words.`,
-            points: state.ws.score,
-            gameId: 'word_search'
-          });
-        }, 500);
+        addToLog('Word Search', 'All ' + state.ws.words.length + ' words found', state.ws.score);
+        setTimeout(() => showResultModal({ icon: '🔍', title: 'All Words Found!', message: 'Excellent! You found all ' + state.ws.words.length + ' hidden words.', points: state.ws.score, gameId: 'word_search' }), 500);
       }
     } else {
       showToast('Not a word. Try again!');
     }
-
     state.ws.selectStart = null;
     state.ws.currentSelection = [];
     renderWordSearch();
@@ -1593,12 +1551,13 @@ function wsSelectCell(r, c) {
 }
 
 function renderWsWordList() {
-  const container = $('ws-word-list');
+  const container = $('ws-wordlist');
+  if (!container) return;
   container.innerHTML = state.ws.words.map(w => `
     <span class="px-3 py-1 rounded-full text-sm font-bold border-2
       ${state.ws.foundWords.includes(w)
-        ? 'bg-teal-100 dark:bg-teal-950/30 border-teal-400 text-teal-600 dark:text-teal-400 line-through'
-        : 'bg-slate-100 dark:bg-slate-800 border-slate-300 dark:border-slate-600 text-slate-600 dark:text-slate-300'}">
+        ? 'bg-teal-100 border-teal-400 text-teal-600 line-through'
+        : 'bg-slate-100 dark:bg-slate-800 border-slate-300 text-slate-600 dark:text-slate-300'}">
       ${w}
     </span>
   `).join('');
@@ -1607,17 +1566,15 @@ function renderWsWordList() {
 function wsTriggerHint() {
   if (state.ws.hintUsed) { showToast('Hint already used!'); return; }
   state.ws.hintUsed = true;
-  // Highlight first unfound word's first cell
   const unfound = state.ws.words.find(w => !state.ws.foundWords.includes(w));
   if (!unfound) return;
   const placed = state.ws.placedWords.find(pw => pw.word === unfound);
   if (!placed) return;
   const [r, c] = placed.cells[0];
-  showToast(`Hint: "${unfound}" starts at row ${r + 1}, col ${c + 1}`);
+  showToast('Hint: "' + unfound + '" starts at row ' + (r + 1) + ', col ' + (c + 1));
 }
 
 function wsTriggerGiveUp() {
-  // Reveal all words
   state.ws.foundWords = [...state.ws.words];
   renderWordSearch();
   renderWsWordList();
@@ -1653,9 +1610,15 @@ function initWrConfig() {
   state.wr.score = 0;
   state.wr.set = 1;
   state.wr.selectedWords = [];
-  $('wr-score-display').textContent = 'Score: 0';
+  const scoreEl = $('wr-score-display');
+  if (scoreEl) scoreEl.textContent = 'Score: 0';
   clearInterval(state.wr.timerInterval);
-  showWrMemorisePhase();
+  const configPanel = $('wr-config-panel');
+  const memorizePanel = $('wr-phase-memorize');
+  const recallPanel = $('wr-phase-recall');
+  if (configPanel) configPanel.classList.remove('hidden');
+  if (memorizePanel) memorizePanel.classList.add('hidden');
+  if (recallPanel) recallPanel.classList.add('hidden');
 }
 
 function setWrLevel(level) {
@@ -1663,38 +1626,56 @@ function setWrLevel(level) {
   const timeMap = { easy: 8, medium: 10, hard: 14 };
   state.wr.timerSec = timeMap[level];
   ['easy', 'medium', 'hard'].forEach(l => {
-    const btn = $(`wr-level-${l}`);
-    btn.className = `config-btn ${l === level ? 'bg-orange-500 text-white' : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300'}`;
+    const btn = $('wr-lvl-' + l);
+    if (btn) btn.className = 'config-btn ' + (l === level ? 'bg-indigo-500 text-white' : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300');
   });
-  initWrConfig();
 }
 
-function showWrMemorisePhase() {
+function setWrTimer(t) {
+  state.wr.timerSec = t;
+  [5, 8, 10].forEach(v => {
+    const btn = $('wr-time-' + v);
+    if (btn) btn.className = 'config-btn ' + (v === t ? 'bg-indigo-500 text-white' : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300');
+  });
+}
+
+function startWrGameSession() {
+  state.wr.score = 0;
+  state.wr.set = 1;
+  const configPanel = $('wr-config-panel');
+  if (configPanel) configPanel.classList.add('hidden');
+  startWrMemorizePhase();
+}
+
+function startWrMemorizePhase() {
   const sets = WR_WORD_SETS[state.wr.level];
   const setData = sets[(state.wr.set - 1) % sets.length];
-  state.wr.currentWords = setData;
-  state.wr.allWords = shuffle([...setData, ...generateWrDistractors(setData)]);
+  const wordCount = state.wr.level === 'easy' ? 4 : state.wr.level === 'medium' ? 5 : 6;
+  state.wr.currentWords = setData.slice(0, wordCount);
+  state.wr.allWords = shuffle([...state.wr.currentWords, ...generateWrDistractors(state.wr.currentWords)]);
   state.wr.selectedWords = [];
-
-  $('wr-set-indicator').textContent = `Set ${state.wr.set} of ${state.wr.totalSets}`;
-  $('wr-phase-label').textContent = '👀 Memorise these words!';
-  $('wr-word-display').innerHTML = setData.map(w =>
-    `<span class="px-4 py-2 bg-orange-100 dark:bg-orange-950/30 text-orange-700 dark:text-orange-300 rounded-2xl font-bold text-base border-2 border-orange-300 dark:border-orange-700">${w}</span>`
-  ).join('');
-  $('wr-options-grid').innerHTML = '';
-  $('wr-options-grid').classList.add('hidden');
-  $('wr-submit-btn').classList.add('hidden');
-
-  // Countdown timer
+  const trackerEl = $('wr-set-tracker');
+  if (trackerEl) trackerEl.textContent = 'Set ' + state.wr.set + ' of ' + state.wr.totalSets;
+  const memorizePanel = $('wr-phase-memorize');
+  const recallPanel = $('wr-phase-recall');
+  if (memorizePanel) memorizePanel.classList.remove('hidden');
+  if (recallPanel) recallPanel.classList.add('hidden');
+  const wordsEl = $('wr-words-to-memorize');
+  if (wordsEl) {
+    wordsEl.innerHTML = state.wr.currentWords.map(w =>
+      '<div class="px-4 py-3 bg-purple-100 dark:bg-purple-950/30 text-purple-700 dark:text-purple-300 rounded-2xl font-bold text-base border-2 border-purple-300">' + w + '</div>'
+    ).join('');
+  }
   let timeLeft = state.wr.timerSec;
-  $('wr-timer-badge').textContent = formatTime(timeLeft);
+  const timerEl = $('wr-timer');
+  if (timerEl) timerEl.textContent = timeLeft;
   clearInterval(state.wr.timerInterval);
   state.wr.timerInterval = setInterval(() => {
     timeLeft--;
-    $('wr-timer-badge').textContent = formatTime(timeLeft);
+    if (timerEl) timerEl.textContent = timeLeft;
     if (timeLeft <= 0) {
       clearInterval(state.wr.timerInterval);
-      showWrRecallPhase();
+      startWrRecallPhase();
     }
   }, 1000);
 }
@@ -1705,79 +1686,66 @@ function generateWrDistractors(words) {
   return shuffle(filtered).slice(0, 5);
 }
 
-function showWrRecallPhase() {
-  $('wr-phase-label').textContent = '🧠 Which words did you see?';
-  $('wr-word-display').innerHTML = '❓'.repeat(state.wr.currentWords.length).split('').map(e =>
-    `<span class="px-4 py-2 bg-slate-100 dark:bg-slate-800 text-slate-400 rounded-2xl font-bold text-base border-2 border-slate-300 dark:border-slate-600">${e}</span>`
-  ).join('');
-
-  const grid = $('wr-options-grid');
-  grid.classList.remove('hidden');
-  grid.innerHTML = state.wr.allWords.map((w, i) => `
-    <button onclick="toggleWrWord(${i})"
-      id="wr-opt-${i}"
-      class="wr-opt-btn py-2 px-3 rounded-2xl border-2 border-slate-200 dark:border-slate-700
-             bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-200 font-bold text-sm
-             hover:border-orange-400 hover:bg-orange-50 dark:hover:bg-orange-950/20 transition-all duration-200">
-      ${w}
-    </button>
-  `).join('');
-
-  $('wr-submit-btn').classList.remove('hidden');
+function startWrRecallPhase() {
+  const memorizePanel = $('wr-phase-memorize');
+  const recallPanel = $('wr-phase-recall');
+  if (memorizePanel) memorizePanel.classList.add('hidden');
+  if (recallPanel) recallPanel.classList.remove('hidden');
+  const matrixEl = $('wr-words-matrix');
+  if (matrixEl) {
+    matrixEl.innerHTML = state.wr.allWords.map((w, i) => `
+      <button onclick="toggleWrWord(${i})" id="wr-opt-${i}"
+        class="wr-opt-btn py-3 px-3 rounded-2xl border-2 border-slate-200 dark:border-slate-700
+               bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-200 font-bold text-sm
+               hover:border-purple-400 hover:bg-purple-50 transition-all duration-200">
+        ${w}
+      </button>
+    `).join('');
+  }
 }
 
 function toggleWrWord(index) {
   const word = state.wr.allWords[index];
-  const btn = $(`wr-opt-${index}`);
+  const btn = $('wr-opt-' + index);
   if (state.wr.selectedWords.includes(word)) {
     state.wr.selectedWords = state.wr.selectedWords.filter(w => w !== word);
-    btn.classList.remove('border-orange-500', 'bg-orange-100', 'dark:bg-orange-950/30', 'text-orange-600');
+    if (btn) btn.classList.remove('border-purple-500', 'bg-purple-100', 'text-purple-600');
   } else {
     if (state.wr.selectedWords.length >= state.wr.currentWords.length) {
-      showToast(`Select only ${state.wr.currentWords.length} words!`);
+      showToast('Select only ' + state.wr.currentWords.length + ' words!');
       return;
     }
     state.wr.selectedWords.push(word);
-    btn.classList.add('border-orange-500', 'bg-orange-100', 'dark:bg-orange-950/30', 'text-orange-600');
+    if (btn) btn.classList.add('border-purple-500', 'bg-purple-100', 'text-purple-600');
   }
 }
 
-function submitWrAnswer() {
+function submitWordRecallSet() {
   const correct = state.wr.currentWords;
   const selected = state.wr.selectedWords;
   const hits = selected.filter(w => correct.includes(w)).length;
   const points = hits * 10;
   state.wr.score += points;
-  $('wr-score-display').textContent = `Score: ${state.wr.score}`;
-
-  // Show correct/wrong highlights
+  const scoreEl = $('wr-score-display');
+  if (scoreEl) scoreEl.textContent = 'Score: ' + state.wr.score;
   state.wr.allWords.forEach((w, i) => {
-    const btn = $(`wr-opt-${i}`);
+    const btn = $('wr-opt-' + i);
     if (!btn) return;
     btn.disabled = true;
     if (correct.includes(w)) {
-      btn.classList.add('border-emerald-500', 'bg-emerald-50', 'dark:bg-emerald-950/20', 'text-emerald-600');
+      btn.classList.add('border-emerald-500', 'bg-emerald-50', 'text-emerald-600');
     } else if (selected.includes(w)) {
-btn.classList.add('border-red-500', 'bg-red-50', 'dark:bg-red-950/20', 'text-red-500');
+      btn.classList.add('border-red-500', 'bg-red-50', 'text-red-500');
     }
   });
-
-  showToast(`You recalled ${hits} of ${correct.length} words! +${points} pts`);
-  $('wr-submit-btn').classList.add('hidden');
-
+  showToast('You recalled ' + hits + ' of ' + correct.length + ' words! +' + points + ' pts');
   setTimeout(() => {
     if (state.wr.set >= state.wr.totalSets) {
-      addToLog('Word Recall', `${state.wr.score} pts`, state.wr.score);
-      showResultModal({
-        icon: '🧠',
-        title: 'Memory Test Complete!',
-        message: `You scored ${state.wr.score} out of ${state.wr.totalSets * state.wr.currentWords.length * 10} pts. Great mental workout!`,
-        points: state.wr.score,
-        gameId: 'word_recall'
-      });
+      addToLog('Word Recall', state.wr.score + ' pts', state.wr.score);
+      showResultModal({ icon: '🧠', title: 'Memory Test Complete!', message: 'You scored ' + state.wr.score + ' pts. Great mental workout!', points: state.wr.score, gameId: 'word_recall' });
     } else {
       state.wr.set++;
-      showWrMemorisePhase();
+      startWrMemorizePhase();
     }
   }, 1800);
 }
@@ -1787,358 +1755,627 @@ function wrTriggerHint() {
   const unrevealed = state.wr.currentWords.filter(w => !state.wr.selectedWords.includes(w));
   if (unrevealed.length === 0) { showToast('You already have them all!'); return; }
   const hint = unrevealed[0];
-  showToast(`Hint: One word starts with "${hint[0]}" and has ${hint.length} letters.`);
+  showToast('Hint: One word starts with "' + hint[0] + '" and has ' + hint.length + ' letters.');
 }
 
 function wrTriggerGiveUp() {
   clearInterval(state.wr.timerInterval);
-  // Reveal all correct words
   state.wr.allWords.forEach((w, i) => {
-    const btn = $(`wr-opt-${i}`);
+    const btn = $('wr-opt-' + i);
     if (!btn) return;
     btn.disabled = true;
-    if (state.wr.currentWords.includes(w)) {
-      btn.classList.add('border-emerald-500', 'bg-emerald-50', 'dark:bg-emerald-950/20', 'text-emerald-600');
-    }
+    if (state.wr.currentWords.includes(w)) btn.classList.add('border-emerald-500', 'bg-emerald-50', 'text-emerald-600');
   });
-  $('wr-submit-btn').classList.add('hidden');
   addToLog('Word Recall', 'Gave up', state.wr.score);
-  showToast('Answers revealed. Keep practising your memory!');
+  showToast('Answers revealed. Keep practising!');
+}
+
+// ================================================
+// DIGIT DASH GAME
+// ================================================
+function initDdConfig() {
+  state.dd.score = 0;
+  state.dd.set = 1;
+  clearInterval(state.dd.timerInterval);
+  clearInterval(state.dd.ringInterval);
+  const scoreEl = $('dd-score-display');
+  if (scoreEl) scoreEl.textContent = 'Score: 0';
+  const trackerEl = $('dd-set-tracker');
+  if (trackerEl) trackerEl.textContent = 'Set 1 of 6';
+  const setupPanel = $('dd-setup-panel');
+  const memorizePanel = $('dd-memorize-panel');
+  const inputPanel = $('dd-input-panel');
+  if (setupPanel) setupPanel.classList.remove('hidden');
+  if (memorizePanel) { memorizePanel.classList.add('hidden'); memorizePanel.classList.remove('flex'); }
+  if (inputPanel) inputPanel.classList.add('hidden');
+}
+
+function setDdDigitLength(len) {
+  state.dd.digitLength = len;
+  [7, 8, 9, 10].forEach(v => {
+    const btn = $('dd-len-' + v);
+    if (btn) btn.className = 'config-btn ' + (v === len ? 'bg-indigo-500 text-white' : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300');
+  });
+}
+
+function setDdViewTime(t) {
+  state.dd.viewTime = t;
+  [10, 15, 20].forEach(v => {
+    const btn = $('dd-time-' + v);
+    if (btn) btn.className = 'config-btn ' + (v === t ? 'bg-indigo-500 text-white' : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300');
+  });
+}
+
+function startDdChallengeSeries() {
+  state.dd.score = 0;
+  state.dd.set = 1;
+  const setupPanel = $('dd-setup-panel');
+  if (setupPanel) setupPanel.classList.add('hidden');
+  startDdSet();
+}
+
+function startDdSet() {
+  const trackerEl = $('dd-set-tracker');
+  if (trackerEl) trackerEl.textContent = 'Set ' + state.dd.set + ' of ' + state.dd.totalSets;
+  let digits = '';
+  for (let i = 0; i < state.dd.digitLength; i++) digits += randInt(0, 9);
+  state.dd.currentDigits = digits;
+  const memorizePanel = $('dd-memorize-panel');
+  const inputPanel = $('dd-input-panel');
+  if (memorizePanel) { memorizePanel.classList.remove('hidden'); memorizePanel.classList.add('flex'); }
+  if (inputPanel) inputPanel.classList.add('hidden');
+  const displayEl = $('dd-display-digits');
+  if (displayEl) displayEl.textContent = digits;
+  const inputEl = $('dd-typed-input');
+  if (inputEl) inputEl.value = '';
+  let timeLeft = state.dd.viewTime;
+  const secEl = $('dd-circle-sec-display');
+  if (secEl) secEl.textContent = timeLeft;
+  const ring = $('dd-ring-progress');
+  const circumference = 283;
+  if (ring) ring.style.strokeDashoffset = '0';
+  clearInterval(state.dd.timerInterval);
+  clearInterval(state.dd.ringInterval);
+  state.dd.timerInterval = setInterval(() => {
+    timeLeft--;
+    if (secEl) secEl.textContent = timeLeft;
+    if (ring) ring.style.strokeDashoffset = String(circumference * (1 - timeLeft / state.dd.viewTime));
+    if (timeLeft <= 0) {
+      clearInterval(state.dd.timerInterval);
+      if (memorizePanel) { memorizePanel.classList.add('hidden'); memorizePanel.classList.remove('flex'); }
+      if (inputPanel) inputPanel.classList.remove('hidden');
+    }
+  }, 1000);
+}
+
+function ddKeypad(val) {
+  const input = $('dd-typed-input');
+  if (!input) return;
+  if (val === 'backspace') {
+    input.value = input.value.slice(0, -1);
+  } else if (val === 'clear') {
+    input.value = '';
+  } else {
+    if (input.value.length < state.dd.digitLength) input.value += val;
+  }
+}
+
+function submitDdAnswer() {
+  const input = $('dd-typed-input');
+  const typed = input ? input.value : '';
+  const correct = state.dd.currentDigits;
+  let hits = 0;
+  for (let i = 0; i < correct.length; i++) {
+    if (typed[i] === correct[i]) hits++;
+  }
+  const points = typed === correct ? 20 : Math.floor((hits / correct.length) * 15);
+  state.dd.score += points;
+  const scoreEl = $('dd-score-display');
+  if (scoreEl) scoreEl.textContent = 'Score: ' + state.dd.score;
+  if (typed === correct) {
+    showToast('Perfect! +' + points + ' pts 🎉');
+  } else {
+    showToast('Answer was: ' + correct + ' · +' + points + ' pts');
+  }
+  setTimeout(() => {
+    if (state.dd.set >= state.dd.totalSets) {
+      addToLog('Digit Dash', state.dd.score + ' pts', state.dd.score);
+      showResultModal({ icon: '🔢', title: 'Digit Dash Complete!', message: 'You scored ' + state.dd.score + ' pts over ' + state.dd.totalSets + ' sets!', points: state.dd.score, gameId: 'digit_dash' });
+    } else {
+      state.dd.set++;
+      startDdSet();
+    }
+  }, 1500);
+}
+
+function ddTriggerHint() {
+  const digits = state.dd.currentDigits;
+  if (!digits) return;
+  showToast('Hint: First digit is ' + digits[0] + ', last is ' + digits[digits.length - 1]);
+}
+
+function ddTriggerGiveUp() {
+  clearInterval(state.dd.timerInterval);
+  const inputEl = $('dd-typed-input');
+  if (inputEl) inputEl.value = state.dd.currentDigits;
+  showToast('Answer revealed: ' + state.dd.currentDigits);
+  setTimeout(() => {
+    if (state.dd.set >= state.dd.totalSets) {
+      addToLog('Digit Dash', 'Gave up', state.dd.score);
+      showResultModal({ icon: '🔢', title: 'Digit Dash Ended', message: 'Final score: ' + state.dd.score + ' pts.', points: state.dd.score, gameId: 'digit_dash' });
+    } else {
+      state.dd.set++;
+      startDdSet();
+    }
+  }, 1500);
+}
+
+// ================================================
+// SUDOKU GAME
+// ================================================
+function initSudokuConfig() {
+  clearInterval(state.sk.timerInterval);
+  state.sk.score = 0;
+  state.sk.errors = 0;
+  state.sk.hintCount = 3;
+  state.sk.selectedCell = null;
+  state.sk.elapsedSec = 0;
+  const scoreEl = $('sk-score-display');
+  if (scoreEl) scoreEl.textContent = 'Score: 0';
+  const errEl = $('sk-errors');
+  if (errEl) errEl.textContent = '0';
+  const hintEl = $('sk-hint-count');
+  if (hintEl) hintEl.textContent = '3';
+  const timerEl = $('sk-timer-badge');
+  if (timerEl) timerEl.textContent = '00:00';
+}
+
+function setSkDifficulty(diff) {
+  state.sk.difficulty = diff;
+  ['easy', 'medium', 'hard'].forEach(d => {
+    const btn = $('sk-diff-' + d);
+    if (btn) btn.className = 'config-btn ' + (d === diff ? 'bg-pink-500 text-white' : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300');
+  });
+}
+
+function generateSudoku() {
+  clearInterval(state.sk.timerInterval);
+  state.sk.errors = 0;
+  state.sk.hintCount = 3;
+  state.sk.selectedCell = null;
+  state.sk.elapsedSec = 0;
+  const errEl = $('sk-errors');
+  if (errEl) errEl.textContent = '0';
+  const hintEl = $('sk-hint-count');
+  if (hintEl) hintEl.textContent = '3';
+  const solution = generateSudokuSolution();
+  state.sk.solution = solution;
+  const removeCount = state.sk.difficulty === 'easy' ? 30 : state.sk.difficulty === 'medium' ? 45 : 55;
+  const board = solution.map(row => [...row]);
+  let removed = 0;
+  while (removed < removeCount) {
+    const r = randInt(0, 8);
+    const c = randInt(0, 8);
+    if (board[r][c] !== 0) { board[r][c] = 0; removed++; }
+  }
+  state.sk.board = board;
+  renderSudokuBoard();
+  state.sk.timerInterval = setInterval(() => {
+    state.sk.elapsedSec++;
+    const timerEl = $('sk-timer-badge');
+    if (timerEl) timerEl.textContent = formatTime(state.sk.elapsedSec);
+  }, 1000);
+}
+
+function generateSudokuSolution() {
+  const board = Array.from({ length: 9 }, () => Array(9).fill(0));
+  fillSudoku(board);
+  return board;
+}
+
+function fillSudoku(board) {
+  for (let r = 0; r < 9; r++) {
+    for (let c = 0; c < 9; c++) {
+      if (board[r][c] === 0) {
+        const nums = shuffle([1,2,3,4,5,6,7,8,9]);
+        for (const num of nums) {
+          if (isSudokuValid(board, r, c, num)) {
+            board[r][c] = num;
+            if (fillSudoku(board)) return true;
+            board[r][c] = 0;
+          }
+        }
+        return false;
+      }
+    }
+  }
+  return true;
+}
+
+function isSudokuValid(board, row, col, num) {
+  for (let i = 0; i < 9; i++) {
+    if (board[row][i] === num || board[i][col] === num) return false;
+  }
+  const br = Math.floor(row / 3) * 3;
+  const bc = Math.floor(col / 3) * 3;
+  for (let r = br; r < br + 3; r++) {
+    for (let c = bc; c < bc + 3; c++) {
+      if (board[r][c] === num) return false;
+    }
+  }
+  return true;
+}
+
+function renderSudokuBoard() {
+  const boardEl = $('sk-board');
+  if (!boardEl) return;
+  boardEl.innerHTML = '';
+  for (let r = 0; r < 9; r++) {
+    for (let c = 0; c < 9; c++) {
+      const val = state.sk.board[r][c];
+      const solVal = state.sk.solution[r][c];
+      const isOriginal = val !== 0 && val === solVal;
+      const isSelected = state.sk.selectedCell && state.sk.selectedCell[0] === r && state.sk.selectedCell[1] === c;
+      const borderR = (r + 1) % 3 === 0 && r !== 8 ? 'border-b-2 border-b-slate-600' : 'border-b border-b-slate-300 dark:border-b-slate-600';
+      const borderC = (c + 1) % 3 === 0 && c !== 8 ? 'border-r-2 border-r-slate-600' : 'border-r border-r-slate-300 dark:border-r-slate-600';
+      const cell = document.createElement('button');
+      cell.className = 'sudoku-cell ' + borderR + ' ' + borderC + ' ' +
+        (isSelected ? 'bg-indigo-200 dark:bg-indigo-800' :
+         isOriginal ? 'bg-slate-100 dark:bg-slate-800' :
+         'bg-white dark:bg-slate-900 hover:bg-indigo-50 dark:hover:bg-indigo-950/30');
+      cell.style.color = isOriginal ? '' : '#6366f1';
+      cell.textContent = val !== 0 ? val : '';
+      if (!isOriginal || val === 0) {
+        cell.onclick = () => selectSudokuCell(r, c);
+      }
+      boardEl.appendChild(cell);
+    }
+  }
+}
+
+function selectSudokuCell(r, c) {
+  const originalVal = state.sk.solution[r][c];
+  const currentVal = state.sk.board[r][c];
+  if (currentVal !== 0 && currentVal === originalVal) return;
+  state.sk.selectedCell = [r, c];
+  renderSudokuBoard();
+}
+
+function skInputNum(num) {
+  if (!state.sk.selectedCell) { showToast('Tap a cell first!'); return; }
+  const [r, c] = state.sk.selectedCell;
+  if (num === 0) {
+    state.sk.board[r][c] = 0;
+    renderSudokuBoard();
+    return;
+  }
+  const correct = state.sk.solution[r][c];
+  if (num === correct) {
+    state.sk.board[r][c] = num;
+    showToast('Correct! ✓');
+    renderSudokuBoard();
+        if (state.sk.board.every(row => row.every(cell => cell !== 0))) {
+      clearInterval(state.sk.timerInterval);
+      const timeBonus = Math.max(0, 300 - state.sk.elapsedSec);
+      const errorPenalty = state.sk.errors * 10;
+      state.sk.score = Math.max(0, 200 + timeBonus - errorPenalty);
+      const scoreEl = $('sk-score-display');
+      if (scoreEl) scoreEl.textContent = 'Score: ' + state.sk.score;
+      addToLog('Sudoku', state.sk.difficulty + ' · ' + formatTime(state.sk.elapsedSec), state.sk.score);
+      setTimeout(() => showResultModal({
+        icon: '🧩',
+        title: 'Sudoku Solved!',
+        message: 'You completed the ' + state.sk.difficulty + ' puzzle in ' + formatTime(state.sk.elapsedSec) + ' with ' + state.sk.errors + ' error(s).',
+        points: state.sk.score,
+        gameId: 'sudoku'
+      }), 500);
+    }
+  } else {
+    state.sk.errors++;
+    const errEl = $('sk-errors');
+    if (errEl) errEl.textContent = state.sk.errors;
+    showToast('Incorrect! Try again.');
+    if (state.sk.errors >= 10) {
+      clearInterval(state.sk.timerInterval);
+      addToLog('Sudoku', 'Too many errors', 0);
+      showResultModal({
+        icon: '🧩',
+        title: 'Game Over',
+        message: 'You made 10 errors. Better luck next time!',
+        points: 0,
+        gameId: 'sudoku'
+      });
+    }
+  }
+}
+
+function skTriggerHint() {
+  if (state.sk.hintCount <= 0) { showToast('No hints remaining!'); return; }
+  const emptyCells = [];
+  for (let r = 0; r < 9; r++) {
+    for (let c = 0; c < 9; c++) {
+      if (state.sk.board[r][c] === 0) emptyCells.push([r, c]);
+    }
+  }
+  if (emptyCells.length === 0) { showToast('Board is already complete!'); return; }
+  const [r, c] = emptyCells[randInt(0, emptyCells.length - 1)];
+  state.sk.board[r][c] = state.sk.solution[r][c];
+  state.sk.hintCount--;
+  const hintEl = $('sk-hint-count');
+  if (hintEl) hintEl.textContent = state.sk.hintCount;
+  showToast('Hint used: placed ' + state.sk.solution[r][c] + ' at row ' + (r + 1) + ', col ' + (c + 1));
+  renderSudokuBoard();
+}
+
+function skTriggerGiveUp() {
+  clearInterval(state.sk.timerInterval);
+  state.sk.board = state.sk.solution.map(row => [...row]);
+  renderSudokuBoard();
+  addToLog('Sudoku', 'Gave up', 0);
+  showToast('Solution revealed!');
 }
 
 // ================================================
 // MATH SPRINT GAME
 // ================================================
-function initMathSprint() {
+const MS_OPERATIONS = {
+  addition: { symbol: '+', generate: (d) => {
+    const max = d === 'easy' ? 20 : d === 'medium' ? 50 : 100;
+    const a = randInt(1, max); const b = randInt(1, max);
+    return { question: a + ' + ' + b, answer: a + b };
+  }},
+  subtraction: { symbol: '−', generate: (d) => {
+    const max = d === 'easy' ? 20 : d === 'medium' ? 50 : 100;
+    const a = randInt(1, max); const b = randInt(1, a);
+    return { question: a + ' − ' + b, answer: a - b };
+  }},
+  multiplication: { symbol: '×', generate: (d) => {
+    const max = d === 'easy' ? 5 : d === 'medium' ? 10 : 12;
+    const a = randInt(1, max); const b = randInt(1, max);
+    return { question: a + ' × ' + b, answer: a * b };
+  }},
+  division: { symbol: '÷', generate: (d) => {
+    const max = d === 'easy' ? 5 : d === 'medium' ? 10 : 12;
+    const b = randInt(1, max); const answer = randInt(1, max);
+    return { question: (b * answer) + ' ÷ ' + b, answer };
+  }}
+};
+
+function initMsConfig() {
+  clearInterval(state.ms.timerInterval);
   state.ms.score = 0;
-  state.ms.round = 1;
-  state.ms.streak = 0;
-  state.ms.hintUsed = false;
-  $('ms-score-display').textContent = 'Score: 0';
-  $('ms-streak-badge').textContent = '🔥 0';
-  clearInterval(state.ms.timerInterval);
-  generateMsQuestion();
+  state.ms.current = 0;
+  state.ms.correct = 0;
+  state.ms.wrong = 0;
+  const scoreEl = $('ms-score-display');
+  if (scoreEl) scoreEl.textContent = 'Score: 0';
+  const configPanel = $('ms-config-panel');
+  const gamePanel = $('ms-game-panel');
+  const resultsPanel = $('ms-results-panel');
+  if (configPanel) configPanel.classList.remove('hidden');
+  if (gamePanel) gamePanel.classList.add('hidden');
+  if (resultsPanel) resultsPanel.classList.add('hidden');
 }
 
-function setMsLevel(level) {
-  state.ms.level = level;
-  ['easy', 'medium', 'hard'].forEach(l => {
-    const btn = $(`ms-level-${l}`);
-    btn.className = `config-btn ${l === level ? 'bg-rose-500 text-white' : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300'}`;
+function setMsDifficulty(diff) {
+  state.ms.difficulty = diff;
+  ['easy', 'medium', 'hard'].forEach(d => {
+    const btn = $('ms-diff-' + d);
+    if (btn) btn.className = 'config-btn ' + (d === diff ? 'bg-orange-500 text-white' : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300');
   });
-  initMathSprint();
 }
 
-function generateMsQuestion() {
-  const level = state.ms.level;
-  let a, b, op, answer;
+function setMsOperation(op) {
+  state.ms.operation = op;
+  ['addition', 'subtraction', 'multiplication', 'division'].forEach(o => {
+    const btn = $('ms-op-' + o);
+    if (btn) btn.className = 'config-btn ' + (o === op ? 'bg-orange-500 text-white' : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300');
+  });
+}
 
-  if (level === 'easy') {
-    op = ['+', '-'][randInt(0, 1)];
-    a = randInt(1, 20);
-    b = randInt(1, 20);
-    if (op === '-' && b > a) [a, b] = [b, a];
-    answer = op === '+' ? a + b : a - b;
-  } else if (level === 'medium') {
-    op = ['+', '-', '×'][randInt(0, 2)];
-    a = randInt(2, 30);
-    b = randInt(2, 12);
-    if (op === '-' && b > a) [a, b] = [b, a];
-    answer = op === '+' ? a + b : op === '-' ? a - b : a * b;
-  } else {
-    op = ['+', '-', '×', '÷'][randInt(0, 3)];
-    if (op === '÷') {
-      b = randInt(2, 12);
-      answer = randInt(2, 12);
-      a = b * answer;
-    } else {
-      a = randInt(5, 50);
-      b = randInt(2, 20);
-      if (op === '-' && b > a) [a, b] = [b, a];
-      answer = op === '+' ? a + b : op === '-' ? a - b : a * b;
-    }
+function setMsQuestionCount(n) {
+  state.ms.totalQuestions = n;
+  [10, 15, 20].forEach(v => {
+    const btn = $('ms-count-' + v);
+    if (btn) btn.className = 'config-btn ' + (v === n ? 'bg-orange-500 text-white' : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300');
+  });
+}
+
+function startMsSprint() {
+  state.ms.score = 0;
+  state.ms.current = 0;
+  state.ms.correct = 0;
+  state.ms.wrong = 0;
+  state.ms.elapsedSec = 0;
+  state.ms.questions = [];
+  for (let i = 0; i < state.ms.totalQuestions; i++) {
+    state.ms.questions.push(MS_OPERATIONS[state.ms.operation].generate(state.ms.difficulty));
   }
-
-  state.ms.currentQuestion = { a, b, op, answer };
-  state.ms.hintUsed = false;
-
-  // Generate 4 options
-  const wrongOptions = new Set();
-  while (wrongOptions.size < 3) {
-    const offset = randInt(-10, 10);
-    const wrong = answer + offset;
-    if (wrong !== answer && wrong >= 0) wrongOptions.add(wrong);
-  }
-  state.ms.options = shuffle([answer, ...wrongOptions]);
-
-  $('ms-round-indicator').textContent = `Q ${state.ms.round} of ${state.ms.totalRounds}`;
-  $('ms-question-display').textContent = `${a} ${op} ${b} = ?`;
-
-  const optContainer = $('ms-options');
-  optContainer.innerHTML = state.ms.options.map((opt, i) => `
-    <button onclick="checkMsAnswer(${i})"
-      class="ms-opt-btn w-full py-3 px-4 rounded-2xl border-2 border-slate-200 dark:border-slate-700
-             bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-200 font-bold text-lg
-             hover:border-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/20 transition-all duration-200"
-      data-index="${i}">
-      ${opt}
-    </button>
-  `).join('');
-
-  // Per-question timer
-  let timeLeft = level === 'easy' ? 10 : level === 'medium' ? 8 : 6;
+  const configPanel = $('ms-config-panel');
+  const gamePanel = $('ms-game-panel');
+  if (configPanel) configPanel.classList.add('hidden');
+  if (gamePanel) gamePanel.classList.remove('hidden');
   clearInterval(state.ms.timerInterval);
-  $('ms-timer-badge').textContent = formatTime(timeLeft);
   state.ms.timerInterval = setInterval(() => {
-    timeLeft--;
-    $('ms-timer-badge').textContent = formatTime(timeLeft);
-    if (timeLeft <= 0) {
-      clearInterval(state.ms.timerInterval);
-      handleMsTimeout();
-    }
+    state.ms.elapsedSec++;
+    const timerEl = $('ms-timer-badge');
+    if (timerEl) timerEl.textContent = formatTime(state.ms.elapsedSec);
   }, 1000);
+  renderMsQuestion();
 }
 
-function handleMsTimeout() {
-  const correct = state.ms.currentQuestion.answer;
-  const buttons = document.querySelectorAll('.ms-opt-btn');
-  buttons.forEach(btn => {
-    btn.disabled = true;
-    if (parseInt(btn.textContent.trim()) === correct) {
-      btn.classList.add('border-emerald-500', 'bg-emerald-50', 'dark:bg-emerald-950/20', 'text-emerald-600');
-    }
-  });
-  state.ms.streak = 0;
-  $('ms-streak-badge').textContent = '🔥 0';
-  showToast(`Time's up! Answer was ${correct}`);
-
-  setTimeout(() => advanceMsRound(), 1200);
+function renderMsQuestion() {
+  const q = state.ms.questions[state.ms.current];
+  const progressEl = $('ms-progress');
+  if (progressEl) progressEl.textContent = (state.ms.current + 1) + ' / ' + state.ms.totalQuestions;
+  const questionEl = $('ms-question');
+  if (questionEl) questionEl.textContent = q.question + ' = ?';
+  const inputEl = $('ms-answer-input');
+  if (inputEl) { inputEl.value = ''; inputEl.focus(); }
+  const feedbackEl = $('ms-feedback');
+  if (feedbackEl) feedbackEl.textContent = '';
 }
 
-function checkMsAnswer(index) {
+function submitMsAnswer() {
+  const inputEl = $('ms-answer-input');
+  if (!inputEl) return;
+  const typed = parseInt(inputEl.value, 10);
+  const q = state.ms.questions[state.ms.current];
+  const feedbackEl = $('ms-feedback');
+  if (isNaN(typed)) { showToast('Please enter a number!'); return; }
+  if (typed === q.answer) {
+    state.ms.correct++;
+    state.ms.score += 10;
+    const scoreEl = $('ms-score-display');
+    if (scoreEl) scoreEl.textContent = 'Score: ' + state.ms.score;
+    if (feedbackEl) { feedbackEl.textContent = '✓ Correct!'; feedbackEl.className = 'text-emerald-500 font-bold text-lg'; }
+  } else {
+    state.ms.wrong++;
+    if (feedbackEl) { feedbackEl.textContent = '✗ Answer: ' + q.answer; feedbackEl.className = 'text-red-500 font-bold text-lg'; }
+  }
+  state.ms.current++;
+  if (state.ms.current >= state.ms.totalQuestions) {
+    setTimeout(() => endMsSprint(), 800);
+  } else {
+    setTimeout(() => renderMsQuestion(), 800);
+  }
+}
+
+function endMsSprint() {
   clearInterval(state.ms.timerInterval);
-  const selected = state.ms.options[index];
-  const correct = state.ms.currentQuestion.answer;
-  const buttons = document.querySelectorAll('.ms-opt-btn');
-  buttons.forEach(btn => btn.disabled = true);
-
-  if (selected === correct) {
-    buttons[index].classList.add('border-emerald-500', 'bg-emerald-50', 'dark:bg-emerald-950/20', 'text-emerald-600');
-    state.ms.streak++;
-    const bonus = state.ms.streak >= 3 ? 15 : 10;
-    state.ms.score += bonus;
-    $('ms-score-display').textContent = `Score: ${state.ms.score}`;
-    $('ms-streak-badge').textContent = `🔥 ${state.ms.streak}`;
-    showToast(state.ms.streak >= 3 ? `Correct! Streak bonus! +${bonus} pts 🔥` : `Correct! +${bonus} pts`);
-  } else {
-    buttons[index].classList.add('border-red-500', 'bg-red-50', 'dark:bg-red-950/20', 'text-red-500');
-    buttons.forEach(btn => {
-      if (parseInt(btn.textContent.trim()) === correct) {
-        btn.classList.add('border-emerald-500', 'bg-emerald-50', 'dark:bg-emerald-950/20', 'text-emerald-600');
-      }
-    });
-    state.ms.streak = 0;
-    $('ms-streak-badge').textContent = '🔥 0';
-    showToast(`Wrong! Answer was ${correct}`);
-  }
-
-  setTimeout(() => advanceMsRound(), 1200);
-}
-
-function advanceMsRound() {
-  if (state.ms.round >= state.ms.totalRounds) {
-    addToLog('Math Sprint', `${state.ms.score} pts`, state.ms.score);
-    showResultModal({
-      icon: '🧮',
-      title: 'Math Sprint Done!',
-      message: `You scored ${state.ms.score} pts over ${state.ms.totalRounds} questions. Sharp mind!`,
-      points: state.ms.score,
-      gameId: 'math_sprint'
-    });
-  } else {
-    state.ms.round++;
-    generateMsQuestion();
-  }
+  const gamePanel = $('ms-game-panel');
+  const resultsPanel = $('ms-results-panel');
+  if (gamePanel) gamePanel.classList.add('hidden');
+  if (resultsPanel) resultsPanel.classList.remove('hidden');
+  const correctEl = $('ms-result-correct');
+  const wrongEl = $('ms-result-wrong');
+  const timeEl = $('ms-result-time');
+  const scoreEl = $('ms-result-score');
+  if (correctEl) correctEl.textContent = state.ms.correct;
+  if (wrongEl) wrongEl.textContent = state.ms.wrong;
+  if (timeEl) timeEl.textContent = formatTime(state.ms.elapsedSec);
+  if (scoreEl) scoreEl.textContent = state.ms.score + ' pts';
+  addToLog('Math Sprint', state.ms.correct + '/' + state.ms.totalQuestions + ' correct', state.ms.score);
+  showResultModal({
+    icon: '➗',
+    title: 'Sprint Complete!',
+    message: 'You got ' + state.ms.correct + ' of ' + state.ms.totalQuestions + ' correct in ' + formatTime(state.ms.elapsedSec) + '.',
+    points: state.ms.score,
+    gameId: 'math_sprint'
+  });
 }
 
 function msTriggerHint() {
-  if (state.ms.hintUsed) { showToast('Hint already used this round!'); return; }
-  state.ms.hintUsed = true;
-  // Eliminate one wrong answer
-  const correct = state.ms.currentQuestion.answer;
-  const buttons = document.querySelectorAll('.ms-opt-btn');
-  const wrongBtns = Array.from(buttons).filter(btn =>
-    parseInt(btn.textContent.trim()) !== correct && !btn.disabled
-  );
-  if (wrongBtns.length > 0) {
-    const toElim = wrongBtns[randInt(0, wrongBtns.length - 1)];
-    toElim.disabled = true;
-    toElim.classList.add('opacity-30');
-    showToast('One wrong answer eliminated!');
-  }
+  const q = state.ms.questions[state.ms.current];
+  if (!q) return;
+  const answer = q.answer;
+  showToast('Hint: The answer is between ' + (answer - 5) + ' and ' + (answer + 5));
 }
 
 function msTriggerGiveUp() {
   clearInterval(state.ms.timerInterval);
-  const correct = state.ms.currentQuestion.answer;
-  const buttons = document.querySelectorAll('.ms-opt-btn');
-  buttons.forEach(btn => {
-    btn.disabled = true;
-    if (parseInt(btn.textContent.trim()) === correct) {
-      btn.classList.add('border-emerald-500', 'bg-emerald-50', 'dark:bg-emerald-950/20', 'text-emerald-600');
-    }
-  });
-  state.ms.streak = 0;
-  $('ms-streak-badge').textContent = '🔥 0';
   addToLog('Math Sprint', 'Gave up', state.ms.score);
-  showToast(`Answer was ${correct}. Moving on...`);
-  setTimeout(() => advanceMsRound(), 1500);
+  endMsSprint();
 }
 
 // ================================================
 // UTILITY FUNCTIONS
 // ================================================
-function shuffle(arr) {
-  const a = [...arr];
-  for (let i = a.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [a[i], a[j]] = [a[j], a[i]];
-  }
-  return a;
+function formatTime(sec) {
+  const m = Math.floor(sec / 60).toString().padStart(2, '0');
+  const s = (sec % 60).toString().padStart(2, '0');
+  return m + ':' + s;
 }
 
 function randInt(min, max) {
   return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
-function formatTime(seconds) {
-  const m = String(Math.floor(seconds / 60)).padStart(2, '0');
-  const s = String(seconds % 60).padStart(2, '0');
-  return `${m}:${s}`;
+function shuffle(arr) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = randInt(0, i);
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
 }
 
 function $(id) {
   return document.getElementById(id);
 }
 
-function showToast(message) {
+function showToast(msg) {
   const toast = $('toast');
   if (!toast) return;
-  toast.textContent = message;
-  toast.classList.remove('opacity-0', 'translate-y-4');
-  toast.classList.add('opacity-100', 'translate-y-0');
+  toast.textContent = msg;
+  toast.classList.remove('opacity-0');
+  toast.classList.add('opacity-100');
   clearTimeout(state.toastTimeout);
   state.toastTimeout = setTimeout(() => {
-    toast.classList.remove('opacity-100', 'translate-y-0');
-    toast.classList.add('opacity-0', 'translate-y-4');
+    toast.classList.remove('opacity-100');
+    toast.classList.add('opacity-0');
   }, 2500);
 }
 
 function showResultModal({ icon, title, message, points, gameId }) {
-  $('result-icon').textContent = icon;
-  $('result-title').textContent = title;
-  $('result-message').textContent = message;
-  $('result-points').textContent = `+${points} pts`;
-  $('result-modal').classList.remove('hidden');
-  $('result-modal').classList.add('flex');
-  state.lastGameId = gameId;
+  const modal = $('result-modal');
+  const iconEl = $('result-icon');
+  const titleEl = $('result-title');
+  const msgEl = $('result-message');
+  const ptsEl = $('result-points');
+  if (iconEl) iconEl.textContent = icon;
+  if (titleEl) titleEl.textContent = title;
+  if (msgEl) msgEl.textContent = message;
+  if (ptsEl) ptsEl.textContent = '+' + points + ' pts';
+  if (modal) modal.classList.remove('hidden');
 }
 
 function closeResultModal() {
-  $('result-modal').classList.add('hidden');
-  $('result-modal').classList.remove('flex');
+  const modal = $('result-modal');
+  if (modal) modal.classList.add('hidden');
 }
 
-function playAgain() {
-  closeResultModal();
-  const gameId = state.lastGameId;
-  if (gameId === 'learn_malay') initLearnMalay();
-  else if (gameId === 'picture_match') startPictureMatch();
-  else if (gameId === 'word_search') initWordSearch();
-  else if (gameId === 'word_recall') initWrConfig();
-  else if (gameId === 'math_sprint') initMathSprint();
-}
-
-function addToLog(gameName, detail, points) {
-  const log = state.dailyLog;
+function addToLog(game, detail, score) {
   const entry = {
-    game: gameName,
+    game,
     detail,
-    points,
-    time: new Date().toLocaleTimeString('en-SG', { hour: '2-digit', minute: '2-digit' })
+    score,
+    timestamp: new Date().toLocaleTimeString()
   };
-  log.unshift(entry);
-  if (log.length > 20) log.pop();
-  renderActivityLog();
+  state.log.unshift(entry);
+  if (state.log.length > 20) state.log.pop();
+  renderLog();
 }
 
-function renderActivityLog() {
-  const container = $('stats-log-list');
-  if (!container) return;
-  if (state.dailyLog.length === 0) {
-    container.innerHTML = `<p class="text-slate-400 dark:text-slate-500 text-sm text-center py-4">No activity yet. Start playing!</p>`;
+function renderLog() {
+  const logEl = $('activity-log');
+  if (!logEl) return;
+  if (state.log.length === 0) {
+    logEl.innerHTML = '<p class="text-slate-400 text-sm text-center py-4">No activity yet. Start playing!</p>';
     return;
   }
-  container.innerHTML = state.dailyLog.map(entry => `
+  logEl.innerHTML = state.log.map(entry => `
     <div class="flex items-center justify-between py-2 border-b border-slate-100 dark:border-slate-800 last:border-0">
       <div>
         <span class="font-semibold text-slate-700 dark:text-slate-200 text-sm">${entry.game}</span>
-        <span class="text-slate-400 dark:text-slate-500 text-xs ml-2">${entry.detail}</span>
+        <span class="text-slate-400 text-xs ml-2">${entry.detail}</span>
       </div>
       <div class="text-right">
-        <span class="text-emerald-500 font-bold text-sm">+${entry.points}</span>
-        <span class="text-slate-400 dark:text-slate-500 text-xs ml-2">${entry.time}</span>
+        <span class="text-indigo-500 font-bold text-sm">${entry.score > 0 ? '+' + entry.score : entry.score} pts</span>
+        <div class="text-slate-400 text-xs">${entry.timestamp}</div>
       </div>
     </div>
   `).join('');
 }
 
-function toggleDarkMode() {
-  document.documentElement.classList.toggle('dark');
-  const isDark = document.documentElement.classList.contains('dark');
-  $('dark-mode-icon').textContent = isDark ? '☀️' : '🌙';
-  localStorage.setItem('theme', isDark ? 'dark' : 'light');
-}
-function loginUser() {
-  const mobile = $('mobile-number').value.trim();
-  if (!mobile || mobile.length < 6) {
-    showToast('Please enter a valid mobile number.');
-    return;
-  }
-  $('dash-user-label').textContent = mobile;
-  showDashboard();
-}
-
-function bypassLogin() {
-  $('dash-user-label').textContent = 'Guest';
-  showDashboard();
-}
-
-function showDashboard() {
-  document.querySelectorAll('main > section').forEach(s => {
-    s.classList.add('hidden');
-    s.classList.remove('flex');
-  });
-  $('screen-dashboard').classList.remove('hidden');
-  $('screen-dashboard').classList.add('flex');
-  state.currentGame = 'dashboard';
-}
 // ================================================
 // INITIALISATION
 // ================================================
 document.addEventListener('DOMContentLoaded', () => {
-  const savedTheme = localStorage.getItem('theme');
-  if (savedTheme === 'dark') {
-    document.documentElement.classList.add('dark');
-  }
-
-  // Show login screen, hide everything else
-  document.querySelectorAll('main > section').forEach(s => {
-    s.classList.add('hidden');
-    s.classList.remove('flex');
-  });
-  $('screen-login').classList.remove('hidden');
-  $('screen-login').classList.add('flex');
-
-  lucide.createIcons();
+  initWsConfig();
+  initWrConfig();
+  initDdConfig();
+  initSudokuConfig();
+  initMsConfig();
+  renderLog();
 });
