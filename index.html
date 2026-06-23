@@ -985,8 +985,8 @@ function exitToDashboard() {
     s.classList.add('hidden');
     s.classList.remove('flex');
   });
-  $('game-dashboard').classList.remove('hidden');
-  $('game-dashboard').classList.add('flex');
+  $('screen-dashboard').classList.remove('hidden');
+  $('screen-dashboard').classList.add('flex');
   state.currentGame = 'dashboard';
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
@@ -2090,24 +2090,46 @@ function toggleDarkMode() {
   $('dark-mode-icon').textContent = isDark ? '☀️' : '🌙';
   localStorage.setItem('theme', isDark ? 'dark' : 'light');
 }
+function loginUser() {
+  const mobile = $('mobile-number').value.trim();
+  if (!mobile || mobile.length < 6) {
+    showToast('Please enter a valid mobile number.');
+    return;
+  }
+  $('dash-user-label').textContent = mobile;
+  showDashboard();
+}
 
+function bypassLogin() {
+  $('dash-user-label').textContent = 'Guest';
+  showDashboard();
+}
+
+function showDashboard() {
+  document.querySelectorAll('main > section').forEach(s => {
+    s.classList.add('hidden');
+    s.classList.remove('flex');
+  });
+  $('screen-dashboard').classList.remove('hidden');
+  $('screen-dashboard').classList.add('flex');
+  state.currentGame = 'dashboard';
+}
 // ================================================
 // INITIALISATION
 // ================================================
 document.addEventListener('DOMContentLoaded', () => {
-  // Restore theme preference
   const savedTheme = localStorage.getItem('theme');
   if (savedTheme === 'dark') {
     document.documentElement.classList.add('dark');
-    $('dark-mode-icon').textContent = '☀️';
   }
 
-  // Init all games to default state
-  setLmLevel('easy');
-  setPmDifficulty('easy');
-  setWsDifficulty('easy');
-  setWrLevel('easy');
-  setMsLevel('easy');
+  // Show login screen, hide everything else
+  document.querySelectorAll('main > section').forEach(s => {
+    s.classList.add('hidden');
+    s.classList.remove('flex');
+  });
+  $('screen-login').classList.remove('hidden');
+  $('screen-login').classList.add('flex');
 
-  renderActivityLog();
+  lucide.createIcons();
 });
