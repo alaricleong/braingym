@@ -2022,7 +2022,7 @@ function $(id) {
 }
 
 function showToast(message) {
-  const toast = $('toast-notification');
+  const toast = $('toast');
   if (!toast) return;
   toast.textContent = message;
   toast.classList.remove('opacity-0', 'translate-y-4');
@@ -2075,11 +2075,11 @@ function addToLog(gameName, detail, points) {
 function renderActivityLog() {
   const container = $('stats-log-list');
   if (!container) return;
-  if (state.activityLog.length === 0) {
+  if (state.dailyLog.length === 0) {
     container.innerHTML = `<p class="text-slate-400 dark:text-slate-500 text-sm text-center py-4">No activity yet. Start playing!</p>`;
     return;
   }
-  container.innerHTML = state.activityLog.map(entry => `
+  container.innerHTML = state.dailyLog.map(entry => `
     <div class="flex items-center justify-between py-2 border-b border-slate-100 dark:border-slate-800 last:border-0">
       <div>
         <span class="font-semibold text-slate-700 dark:text-slate-200 text-sm">${entry.game}</span>
