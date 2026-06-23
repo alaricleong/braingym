@@ -2278,6 +2278,42 @@ function msTriggerGiveUp() {
   addToLog('Math Sprint', 'Gave up', state.ms.score);
   endMsSprint();
 }
+
+function refreshAITip() {
+      const tips = [
+        "Try learning something new today — novelty strengthens neural connections.",
+        "Take a short walk before exercising your brain for better focus.",
+        "Staying hydrated improves memory and concentration significantly.",
+        "Challenge yourself with a slightly harder difficulty to grow your mind.",
+        "Regular brain exercise, like physical exercise, builds lasting strength."
+      ];
+      const box = $('ai-coaching-box');
+      const loading = $('ai-loading');
+      if (loading) loading.classList.remove('hidden');
+      setTimeout(() => {
+        if (box) box.textContent = '"' + tips[randInt(0, tips.length - 1)] + '"';
+        if (loading) loading.classList.add('hidden');
+      }, 800);
+    }
+
+    function openProfileModal() {
+      showToast('Profile feature coming soon!');
+    }
+
+    // ================================================
+    // INITIALISATION
+    // ================================================
+    document.addEventListener('DOMContentLoaded', () => {
+      if (typeof lucide !== 'undefined') lucide.createIcons();
+      renderLog();
+    });
+
+    window.addEventListener('load', () => {
+      if (typeof lucide !== 'undefined') lucide.createIcons();
+    });
+
+</script>
+
 // ================================================
 // INITIALISATION
 // ================================================
